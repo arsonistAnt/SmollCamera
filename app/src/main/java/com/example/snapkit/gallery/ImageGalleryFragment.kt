@@ -1,4 +1,4 @@
-package com.example.snapkit.ImageGalleryFragment
+package com.example.snapkit.gallery
 
 import android.os.Bundle
 import android.view.LayoutInflater

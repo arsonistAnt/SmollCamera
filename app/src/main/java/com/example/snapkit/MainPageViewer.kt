@@ -7,8 +7,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.example.snapkit.CameraViewFragment.CameraViewFragment
-import com.example.snapkit.ImageGalleryFragment.ImageGalleryFragment
+import com.example.snapkit.camera.CameraViewFragment
+import com.example.snapkit.gallery.ImageGalleryFragment
 import com.example.snapkit.databinding.MainPageViewerBinding
 
 /**
