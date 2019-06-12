@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SnapKit</string>
+    <string name="capture_button_string">SNAP</string>
 </resources>
