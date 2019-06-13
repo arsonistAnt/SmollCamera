@@ -22,6 +22,7 @@ class CameraViewFragment : Fragment() {
     lateinit var binding: FragmentCameraViewBinding
     lateinit var viewModel: CameraViewModel
     lateinit var camera: CameraView
+    //TODO: Move this into the CameraViewModel
     lateinit var capturedImage: Bitmap
 
 
@@ -49,6 +50,7 @@ class CameraViewFragment : Fragment() {
         camera = binding.camera
         camera.setLifecycleOwner(viewLifecycleOwner)
         // Override on picture taken CameraListener
+        //TODO: Improve image capture speed. Maybe take a snapshot and run a coroutine for the image capture.
         camera.addCameraListener(object : CameraListener() {
             //TODO: Handle when user interrupts snapshot process via home button or swiping up on the home button.
             override fun onPictureTaken(result: PictureResult) {
