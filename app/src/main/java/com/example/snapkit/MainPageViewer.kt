@@ -1,15 +1,15 @@
 package com.example.snapkit
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.example.snapkit.camera.CameraViewFragment
-import com.example.snapkit.gallery.ImageGalleryFragment
 import com.example.snapkit.databinding.MainPageViewerBinding
+import com.example.snapkit.gallery.ImageGalleryFragment
 
 /**
  * Number of pages users can slide through in the SnapKit app.
@@ -36,7 +36,7 @@ class MainPageViewer : AppCompatActivity() {
 
     }
 
-    private fun initDataBindingObjects(){
+    public fun initDataBindingObjects() {
         binding = DataBindingUtil.setContentView(this, R.layout.main_page_viewer)
         mPager = binding.pagerMainMenu
     }
