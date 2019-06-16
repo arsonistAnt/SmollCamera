@@ -30,8 +30,10 @@ class CameraViewFragment : Fragment() {
 
         // Setup the CameraView
         initCameraView()
-        // Setup button_capture_image as an observer.
+        // Observe the values from the viewModel.
         initObservers()
+        // Set onClickListeners for states/events that doesn't need to be tracked by the View Model.
+        setOnClickListeners()
         return binding.root
     }
 
@@ -76,17 +78,33 @@ class CameraViewFragment : Fragment() {
      */
     private fun showImagePreviewUI(show: Boolean = true) {
         if (show) {
-            binding.imagePreview.visibility = View.VISIBLE
-            binding.exitPreviewButton.visibility = View.VISIBLE
-            binding.buttonCaptureImage.visibility = View.GONE
+            binding.apply {
+                imagePreview.visibility = View.VISIBLE
+                exitPreviewButton.visibility = View.VISIBLE
+                cameraFacingButton.visibility = View.GONE
+                buttonCaptureImage.visibility = View.GONE
+            }
         } else {
             // Remove current image from ImageView otherwise the user will see
             // previous images from past captures.
-            Glide.with(this@CameraViewFragment)
-                .clear(binding.imagePreview)
-            binding.imagePreview.visibility = View.GONE
-            binding.exitPreviewButton.visibility = View.GONE
-            binding.buttonCaptureImage.visibility = View.VISIBLE
+            binding.apply {
+                Glide.with(this@CameraViewFragment)
+                    .clear(imagePreview)
+                imagePreview.visibility = View.GONE
+                exitPreviewButton.visibility = View.GONE
+                buttonCaptureImage.visibility = View.VISIBLE
+                cameraFacingButton.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    /**
+     * Set onClickListeners for events/states that don't need to be tracked by the CameraViewModel.
+     */
+    private fun setOnClickListeners() {
+        // Set a listener to toggle Front/Back facing camera.
+        binding.cameraFacingButton.setOnClickListener {
+            camera.toggleFacing()
         }
     }
 

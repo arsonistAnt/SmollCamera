@@ -24,7 +24,6 @@ class CameraViewModel : ViewModel() {
     val savingFile: LiveData<Boolean>
         get() = _savingFile
 
-    // TODO: Encapsulate this into a class.
     // Stores the JPEG image in bytes.
     private var imageResult: PictureResult? = null
     // Stores the file image path
@@ -74,7 +73,7 @@ class CameraViewModel : ViewModel() {
         // Write image to the DCIM directory.
         try {
             var imageDirectory = getDCIMDirectory()
-            var imageFile = generateImageFile(imageDirectory)
+            var imageFile = generateImageFile(imageDirectory!!)
             imageFilePath = imageFile.path
             imageResult!!.toFile(imageFile) {
                 storeFileComplete()

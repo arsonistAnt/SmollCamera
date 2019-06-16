@@ -15,7 +15,7 @@ const val IMAGE_FILE_SUFFIX = ".JPG"
  *
  * @return a File object that represents the DCIM path of the android device.
  */
-fun getDCIMDirectory() = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+fun getDCIMDirectory(): File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
 
 /**
  * Generate an empty image File with the JPEG file suffix. If the fileName arg is not provided then the

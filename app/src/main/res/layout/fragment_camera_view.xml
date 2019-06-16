@@ -51,6 +51,14 @@
                     android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
                     tools:ignore="ContentDescription"
             />
+            <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:srcCompat="@drawable/ic_sharp_autorenew_24px"
+                    android:id="@+id/camera_facing_button"
+                    android:layout_marginTop="8dp"
+                    tools:ignore="ContentDescription"
+                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="8dp" android:background="@null"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </RelativeLayout>
