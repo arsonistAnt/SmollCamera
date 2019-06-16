@@ -142,7 +142,7 @@ class CameraViewFragment : Fragment() {
                     "File saved!",
                     Toast.LENGTH_SHORT
                 ).show()
-
+                // TODO: Start the media scan as a service that way it will persist even when the user
                 // Re-index the image directory so the media content provider is aware of the newly added file.
                 try {
                     scanForMediaFiles(activity!!.applicationContext, arrayOf(viewModel.getImageResultPath()!!))
@@ -156,6 +156,4 @@ class CameraViewFragment : Fragment() {
             }
         })
     }
-
-
 }

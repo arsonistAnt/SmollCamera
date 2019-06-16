@@ -36,7 +36,7 @@ class MainPageViewer : AppCompatActivity() {
 
     }
 
-    public fun initDataBindingObjects() {
+    private fun initDataBindingObjects() {
         binding = DataBindingUtil.setContentView(this, R.layout.main_page_viewer)
         mPager = binding.pagerMainMenu
     }
