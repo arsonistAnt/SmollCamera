@@ -4,11 +4,15 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
+import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
 const val IMAGE_FILE_SUFFIX = ".JPG"
+const val CLASS_TAG = "MediaStoreUtils"
 
 /**
  * Get a File type reference to the Digital Camera Images directory.
@@ -25,6 +29,10 @@ fun getDCIMDirectory(): File? = Environment.getExternalStoragePublicDirectory(En
  * @param fileName the name of the image file.
  */
 fun generateImageFile(absoluteFilePath: File, fileName: String = getSystemTimeStamp()): File {
+    // Throw an exception if the file directory doesn't exist.
+    if (!absoluteFilePath.exists())
+        throw FileNotFoundException()
+
     val newFileName = fileName + IMAGE_FILE_SUFFIX
     return File(absoluteFilePath, newFileName)
 }
@@ -46,10 +54,23 @@ fun getSystemTimeStamp(): String = SimpleDateFormat("ddMMyyyy_HHmmss").format(Da
  * @param filePaths a string array of file paths.
  */
 fun scanForMediaFiles(context: Context, filePaths: Array<String>) {
-    MediaScannerConnection.scanFile(context, filePaths, null,
-        object : MediaScannerConnection.MediaScannerConnectionClient {
-            override fun onMediaScannerConnected() {}
-            override fun onScanCompleted(p0: String?, p1: Uri?) {}
-        })
+    try {
+        MediaScannerConnection.scanFile(context, filePaths, null,
+            object : MediaScannerConnection.MediaScannerConnectionClient {
+                override fun onMediaScannerConnected() {}
+                override fun onScanCompleted(p0: String?, p1: Uri?) {}
+            })
+    } catch (e: Exception) {
+        Log.e(CLASS_TAG, e.message)
+    }
+
+}
+
+/**
+ * @param constraint the string pattern used to filter the directory.
+ * @return a list of files based on a constraint provided.
+ */
+fun getFilesFromDirectory(fileExts: Array<String>, directory: File): List<File> {
+    return FileUtils.listFiles(directory, fileExts, true) as List<File>
 }
 
