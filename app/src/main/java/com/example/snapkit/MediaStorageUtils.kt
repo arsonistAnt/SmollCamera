@@ -4,8 +4,8 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
-import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
@@ -67,10 +67,27 @@ fun scanForMediaFiles(context: Context, filePaths: Array<String>) {
 }
 
 /**
- * @param constraint the string pattern used to filter the directory.
- * @return a list of files based on a constraint provided.
+ * Use the MediaStore content resolver to retrieve URI data about the image store on the android device.
+ *
+ * @param context the context where the function was called.
+ * @return a list of image file URIs.
  */
-fun getFilesFromDirectory(fileExts: Array<String>, directory: File): List<File> {
-    return FileUtils.listFiles(directory, fileExts, true) as List<File>
+fun getImageUriFromMediaStore(context: Context): List<String> {
+    var dataColumns = arrayOf(MediaStore.Images.Media.DATA)
+    // The location of the index table that will be queried.
+    var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    var contentResolver = context.contentResolver
+    var mCursor = contentResolver.query(uri, dataColumns, null, null, MediaStore.Images.Media.DEFAULT_SORT_ORDER)
+    var filePaths = arrayListOf<String>()
+
+    mCursor.apply {
+        var index = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
+
+        while (moveToNext()) {
+            filePaths.add(getString(index))
+        }
+    }
+    return filePaths
 }
+
 

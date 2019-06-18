@@ -46,7 +46,7 @@ class CameraViewFragment : Fragment() {
         camera.setLifecycleOwner(viewLifecycleOwner)
         /**
          * The preview image should be instantly available to the user, hence taking the snapshot first which is quicker to process.
-         * After the snapshot has been taken we take a high quality photo which will take longer to process. Eventually this fix should be
+         * After the snapshot has been taken another call will take a high quality photo which will take longer to process. Eventually this fix should be
          * optimized/refactored by modifying the CameraView library to handle pausing the PreviewSurface.
          */
         camera.addCameraListener(object : CameraListener() {
@@ -145,7 +145,7 @@ class CameraViewFragment : Fragment() {
                 // TODO: Start the media scan as a service that way it will persist even when the user
                 // Re-index the image directory so the media content provider is aware of the newly added file.
                 try {
-                    scanForMediaFiles(activity!!.applicationContext, arrayOf(viewModel.getImageResultPath()!!))
+                    scanForMediaFiles(requireActivity().applicationContext, arrayOf(viewModel.getImageResultPath()!!))
                 } catch (e: Exception) {
                     Toast.makeText(
                         activity!!.applicationContext,
