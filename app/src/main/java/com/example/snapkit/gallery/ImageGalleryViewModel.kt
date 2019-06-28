@@ -31,7 +31,9 @@ class ImageGalleryViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    //TODO: Use MediatorLiveData to observe when the image
+    /**
+     * Update/Delete cached files in the MediaFileDatabase by getting the latest file index from the MediaStore.
+     */
     fun updateImageFiles() {
         viewModelScope.launch {
             // Fetch the latest files from the media store.
