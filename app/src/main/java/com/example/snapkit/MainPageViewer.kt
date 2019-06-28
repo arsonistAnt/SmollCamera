@@ -33,7 +33,6 @@ class MainPageViewer : AppCompatActivity() {
 
         // Initialize and setup the view pager for the main UI.
         initMainUIPager()
-
     }
 
     private fun initDataBindingObjects() {

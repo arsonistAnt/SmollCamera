@@ -75,8 +75,11 @@ class CameraViewModel : ViewModel() {
             var imageDirectory = getDCIMDirectory()
             var imageFile = generateImageFile(imageDirectory!!)
             imageFilePath = imageFile.path
-            imageResult!!.toFile(imageFile) {
-                storeFileComplete()
+            imageResult?.let {
+                it.toFile(imageFile) {
+                    //TODO: Store in DB here
+                    storeFileComplete()
+                }
             }
         } catch (e: Exception) {
             Log.e("CameraViewModel", e.message)
