@@ -32,7 +32,8 @@ class ImageGalleryViewModel(application: Application) : AndroidViewModel(applica
     }
 
     /**
-     * Update/Delete cached files in the MediaFileDatabase by getting the latest file index from the MediaStore.
+     * Fetch new image files and remove stale ones from the MediaFileDatabase. The new images will be fetched from the
+     * media store.
      */
     fun updateImageFiles() {
         viewModelScope.launch {

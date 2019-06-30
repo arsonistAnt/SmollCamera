@@ -15,22 +15,16 @@
                 android:id="@+id/camera"
                 android:keepScreenOn="true"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:cameraGestureTap="focusWithMarker"
+                app:cameraGesturePinch="zoom"
+        >
 
         </com.otaliastudios.cameraview.CameraView>
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            <Button
-                    android:text="@string/capture_button_string"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_capture_image"
-                    android:onClick="@{() -> viewModel.onCaptureButtonClicked()}"
-                    android:layout_marginEnd="8dp" android:layout_marginBottom="16dp"
-                    app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"/>
             <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -46,7 +40,7 @@
                     android:background="@null"
                     android:visibility="gone"
                     android:onClick="@{() -> viewModel.onPreviewImageStateFinished()}"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    app:srcCompat="@drawable/ic_cancel"
                     android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
                     tools:ignore="ContentDescription"
@@ -59,6 +53,16 @@
                     tools:ignore="ContentDescription"
                     app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginEnd="8dp" android:background="@null"/>
+            <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:srcCompat="@drawable/ic_shutter_circle"
+                    android:id="@+id/button_capture_image"
+                    tools:ignore="ContentDescription"
+                    android:onClick="@{() -> viewModel.onCaptureButtonClicked()}"
+                    android:background="@null" app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="8dp" android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </RelativeLayout>

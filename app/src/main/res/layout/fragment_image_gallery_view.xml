@@ -17,8 +17,8 @@
         <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
+                android:paddingLeft="3dp"
+                android:paddingRight="3dp"
                 android:id="@+id/gallery_recycler_view" tools:layout_editor_absoluteY="254dp"
                 tools:layout_editor_absoluteX="59dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>

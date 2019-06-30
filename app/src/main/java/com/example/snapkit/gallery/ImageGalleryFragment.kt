@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.snapkit.databinding.FragmentImageGalleryViewBinding
 
 class ImageGalleryFragment: Fragment() {
@@ -42,6 +43,15 @@ class ImageGalleryFragment: Fragment() {
             setLayoutManager(layoutManager)
             adapter = galleryAdapter
         }
+        galleryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                if (itemCount == 1) {
+                    galleryAdapter.notifyItemMoved(positionStart, 0)
+                }
+            }
+
+        })
     }
 
     /**
@@ -51,6 +61,7 @@ class ImageGalleryFragment: Fragment() {
         viewModel = ViewModelProviders.of(this).get(ImageGalleryViewModel::class.java)
         viewModel.imageFiles.observe(viewLifecycleOwner, Observer { imageFiles ->
             galleryAdapter.submitList(imageFiles)
+
         })
 
         //Update the cached data to the latest changes from the MediaStore.

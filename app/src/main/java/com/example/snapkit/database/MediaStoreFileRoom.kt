@@ -9,7 +9,8 @@ data class MediaFile(
     @PrimaryKey
     val uri: String,
     val creationDate: String,
-    val creationTime: String
+    val creationTime: String,
+    val dateTakenLong: Long
 )
 
 @Dao
@@ -20,10 +21,10 @@ interface MediaFileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(mediaFiles: List<MediaFile>)
 
-    @Query("SELECT * FROM media_file")
+    @Query("SELECT * FROM media_file ORDER BY dateTakenLong DESC")
     fun getMediaFiles(): LiveData<List<MediaFile>>
 
-    @Query("SELECT * FROM media_file")
+    @Query("SELECT * FROM media_file ORDER BY dateTakenLong DESC")
     suspend fun getMediaFilesAsync(): List<MediaFile>
 
     @Delete
@@ -31,7 +32,7 @@ interface MediaFileDao {
 
 }
 
-@Database(entities = [MediaFile::class], version = 1)
+@Database(entities = [MediaFile::class], version = 2)
 abstract class MediaFileDatabase : RoomDatabase() {
     abstract fun mediaFileDao(): MediaFileDao
 }
@@ -43,9 +44,12 @@ fun getDatabase(context: Context): MediaFileDatabase {
         if (!::INSTANCE.isInitialized) {
             INSTANCE =
                 Room.databaseBuilder(context.applicationContext, MediaFileDatabase::class.java, "media-file-database")
+                    .fallbackToDestructiveMigration()
                     .build()
         }
         return INSTANCE
     }
 }
+
+
 

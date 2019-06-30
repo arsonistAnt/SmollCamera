@@ -19,6 +19,7 @@ class GalleryAdapter :
         }
     }
 
+
     companion object DiffImageFileCallBack : DiffUtil.ItemCallback<ImageFile>() {
 
         override fun areItemsTheSame(oldItem: ImageFile, newItem: ImageFile): Boolean {
@@ -35,6 +36,7 @@ class GalleryAdapter :
         val layoutInflater = LayoutInflater.from(parent.context)
         return PhotoViewHolder(PhotoViewItemBinding.inflate(layoutInflater))
     }
+
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         var imageView = holder.photo.photoView

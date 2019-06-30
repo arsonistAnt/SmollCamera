@@ -1,14 +1,23 @@
 package com.example.snapkit.camera
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.example.snapkit.database.MediaFile
+import com.example.snapkit.database.getDatabase
 import com.example.snapkit.generateImageFile
 import com.example.snapkit.getDCIMDirectory
+import com.example.snapkit.getImageFromMediaStore
+import com.example.snapkit.scanForMediaFiles
 import com.otaliastudios.cameraview.PictureResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-class CameraViewModel : ViewModel() {
+class CameraViewModel(application: Application) : AndroidViewModel(application) {
     // If the user has clicked on the capture image button.
     private val _captureImage = MutableLiveData<Boolean>()
     val captureImageState: LiveData<Boolean>
@@ -78,6 +87,7 @@ class CameraViewModel : ViewModel() {
             imageResult?.let {
                 it.toFile(imageFile) {
                     //TODO: Store in DB here
+                    scanForMediaFiles(getApplication(), arrayOf(imageFilePath!!), ::insertFileToCache)
                     storeFileComplete()
                 }
             }
@@ -85,6 +95,17 @@ class CameraViewModel : ViewModel() {
             Log.e("CameraViewModel", e.message)
         }
     }
+
+    private fun insertFileToCache(context: Context, filePath: String) {
+        var imageFile = getImageFromMediaStore(context, filePath)
+        var db = getDatabase(context).mediaFileDao()
+        CoroutineScope(Job()).launch {
+            imageFile?.let {
+                db.insertMediaFile(MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong))
+            }
+        }
+    }
+
 
     /**
      * Set _inImagePreviewState to true when the image file is done saving to the Media Storage.

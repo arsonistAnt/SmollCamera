@@ -2,7 +2,6 @@ package com.example.snapkit
 
 import android.content.Context
 import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -17,7 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-const val IMAGE_FILE_SUFFIX = ".JPG"
+const val IMAGE_FILE_SUFFIX = ".jpg"
 const val CLASS_TAG = "MediaStoreUtils"
 
 /**
@@ -59,13 +58,22 @@ fun getSystemTimeStamp(): String = SimpleDateFormat("ddMMyyyy_HHmmss").format(Da
  * @param context the application context.
  * @param filePaths a string array of file paths.
  */
-fun scanForMediaFiles(context: Context, filePaths: Array<String>) {
+fun scanForMediaFiles(
+    context: Context,
+    filePaths: Array<String>,
+    dbCallBack: (context: Context, filePath: String) -> Unit
+) {
     try {
-        MediaScannerConnection.scanFile(context, filePaths, null,
-            object : MediaScannerConnection.MediaScannerConnectionClient {
-                override fun onMediaScannerConnected() {}
-                override fun onScanCompleted(p0: String?, p1: Uri?) {}
-            })
+        MediaScannerConnection.scanFile(
+            context,
+            filePaths,
+            null
+        ) { filePath, uri ->
+            if (uri != null) {
+                dbCallBack(context, filePath)
+            }
+
+        }
     } catch (e: Exception) {
         Log.e(CLASS_TAG, e.message)
     }
@@ -81,7 +89,7 @@ fun scanForMediaFiles(context: Context, filePaths: Array<String>) {
 fun getImagesFromMediaStore(context: Context): List<ImageFile> {
     var dataColumns = arrayOf(
         MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED,
-        MediaStore.Images.Media.DATE_TAKEN
+        MediaStore.Images.Media.DATE_TAKEN, MediaStore.Images.Media.DATE_ADDED
     )
     // Select this table located at this URI.
     var select = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -93,16 +101,16 @@ fun getImagesFromMediaStore(context: Context): List<ImageFile> {
 
     mCursor.apply {
         var dataUriIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
-        var dateTakenIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
+        var dateAddedIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
 
         while (moveToNext()) {
-            var dateTakenString = getString(dateTakenIndex)
+            var dateAddedString = getString(dateAddedIndex)
             var dataUriString = getString(dataUriIndex)
             val dateTaken =
-                Instant.ofEpochMilli(dateTakenString.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                Instant.ofEpochMilli(dateAddedString.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
             val dateFormat = dateTaken.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH))
             val timeFormat = dateTaken.format(DateTimeFormatter.ofPattern("E HH:mm:ss", Locale.ENGLISH))
-            filePaths.add(ImageFile(dataUriString, dateFormat, timeFormat))
+            filePaths.add(ImageFile(dataUriString, dateFormat, timeFormat, dateAddedString.toLong()))
         }
     }
     return filePaths
@@ -134,7 +142,7 @@ fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
                 Instant.ofEpochMilli(dateTakenString.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
             val dateFormat = dateTaken.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH))
             val timeFormat = dateTaken.format(DateTimeFormatter.ofPattern("E HH:mm:ss", Locale.ENGLISH))
-            imageFile = ImageFile(dataUriString, dateFormat, timeFormat)
+            imageFile = ImageFile(dataUriString, dateFormat, timeFormat, dateTakenString.toLong())
         }
     }
     return imageFile
@@ -146,7 +154,7 @@ fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
  */
 fun List<MediaFile>.toImageFiles(): List<ImageFile> {
     return map {
-        ImageFile(it.uri, it.creationDate, it.creationTime)
+        ImageFile(it.uri, it.creationDate, it.creationTime, it.dateTakenLong)
     }
 }
 
@@ -155,7 +163,7 @@ fun List<MediaFile>.toImageFiles(): List<ImageFile> {
  */
 fun List<ImageFile>.toMediaFiles(): List<MediaFile> {
     return map {
-        MediaFile(it.filePath, it.dateCreated, it.timeCreated)
+        MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong)
     }
 }
 

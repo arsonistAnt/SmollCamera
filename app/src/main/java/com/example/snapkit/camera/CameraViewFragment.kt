@@ -10,7 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.example.snapkit.databinding.FragmentCameraViewBinding
-import com.example.snapkit.scanForMediaFiles
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
@@ -145,7 +144,6 @@ class CameraViewFragment : Fragment() {
                 // TODO: Start the media scan as a service that way it will persist even when the user
                 // Re-index the image directory so the media content provider is aware of the newly added file.
                 try {
-                    scanForMediaFiles(requireActivity().applicationContext, arrayOf(viewModel.getImageResultPath()!!))
                 } catch (e: Exception) {
                     Toast.makeText(
                         activity!!.applicationContext,
