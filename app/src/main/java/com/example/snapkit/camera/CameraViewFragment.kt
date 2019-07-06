@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.bumptech.glide.Glide
 import com.example.snapkit.databinding.FragmentCameraViewBinding
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
@@ -51,50 +50,9 @@ class CameraViewFragment : Fragment() {
         camera.addCameraListener(object : CameraListener() {
             //TODO: Handle when user interrupts snapshot process via home button or swiping up on the home button.
             override fun onPictureTaken(result: PictureResult) {
-                //TODO: Optimize preview by changing the CameraView lib to pause between take and onTaken states.
-                // https://github.com/natario1/CameraView/issues/476
-                if (result.isSnapshot) {
-                    // Load picture result into image view with glide.
-                    Glide.with(this@CameraViewFragment)
-                        .load(result.data)
-                        .into(binding.imagePreview)
-
-                    // Switch to the preview image state after the picture has been taken.
-                    camera.takePicture()
-                    viewModel.onPreviewImageState(result)
-                } else {
-                    viewModel.storeFile()
-                }
+                viewModel.storeFile(result)
             }
         })
-    }
-
-    /**
-     * Show the buttons and the preview image itself to the user in the image preview state of the app.
-     * By default if called without an argument, the function will set the visibility of the UI to VISIBLE.
-     *
-     * @param show a boolean that decides whether the buttons in the preview state should be shown.
-     */
-    private fun showImagePreviewUI(show: Boolean = true) {
-        if (show) {
-            binding.apply {
-                imagePreview.visibility = View.VISIBLE
-                exitPreviewButton.visibility = View.VISIBLE
-                cameraFacingButton.visibility = View.GONE
-                buttonCaptureImage.visibility = View.GONE
-            }
-        } else {
-            // Remove current image from ImageView otherwise the user will see
-            // previous images from past captures.
-            binding.apply {
-                Glide.with(this@CameraViewFragment)
-                    .clear(imagePreview)
-                imagePreview.visibility = View.GONE
-                exitPreviewButton.visibility = View.GONE
-                buttonCaptureImage.visibility = View.VISIBLE
-                cameraFacingButton.visibility = View.VISIBLE
-            }
-        }
     }
 
     /**
@@ -115,18 +73,8 @@ class CameraViewFragment : Fragment() {
         viewModel.captureImageState.observe(viewLifecycleOwner, Observer { captureState ->
             if (captureState == true) {
                 // Start image capture.
-                camera.takePictureSnapshot()
+                camera.takePicture()
                 viewModel.onCaptureButtonFinished()
-            }
-        })
-
-        // Tell the fragment to handle the preview UI when the user in the image preview state.
-        viewModel.inImagePreviewState.observe(viewLifecycleOwner, Observer { finishCapturedState ->
-            if (finishCapturedState == true) {
-                showImagePreviewUI()
-            } else {
-                // This case is reached when the user presses the "X" button in the preview UI.
-                showImagePreviewUI(false)
             }
         })
 
