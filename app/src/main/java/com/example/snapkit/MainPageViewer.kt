@@ -1,6 +1,7 @@
 package com.example.snapkit
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -35,7 +36,18 @@ class MainPageViewer : AppCompatActivity() {
 
         // Initialize and setup the view pager for the main UI.
         initMainUIPager()
+
+        //Setup System UI.
+        setSystemUI()
     }
+
+    private fun setSystemUI() {
+        window.decorView.apply {
+            systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        }
+    }
+
 
     private fun initDataBindingObjects() {
         binding = DataBindingUtil.setContentView(this, R.layout.main_page_viewer)
