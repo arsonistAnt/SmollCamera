@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.snapkit.databinding.FragmentImageGalleryViewBinding
@@ -36,7 +37,16 @@ class ImageGalleryFragment: Fragment() {
      */
     private fun initRecyclerView() {
         var layoutManager = GridLayoutManager(requireContext(), 3)
-        galleryAdapter = GalleryAdapter()
+        galleryAdapter = GalleryAdapter(OnClickThumbnailListener { filePath ->
+            // Navigate to the ImageViewer when any of the image thumbnail is clicked.
+            var navController = findNavController()
+            var actionToImageViewer =
+                ImageGalleryFragmentDirections.actionImageGalleryFragmentToImageViewerFragment(filePath)
+            navController.navigate(actionToImageViewer)
+
+            // Pass the filePath args to the ImageViewerFragment using safe args.
+
+        })
 
         // Recycler view needs a layout manager and a user defined Adapter class that extends RecyclerAdapter.
         binding.galleryRecyclerView.apply {

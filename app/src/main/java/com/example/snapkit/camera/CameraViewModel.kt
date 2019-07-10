@@ -28,8 +28,10 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     val savingFile: LiveData<Boolean>
         get() = _savingFile
 
-
-    //TODO: Keep a state where user wants to navigate to the gallery by a button click.
+    // If the user wants to navigate to the Image Gallery fragment.
+    private val _navigateToGallery = MutableLiveData<Boolean>()
+    val navigateToGallery: LiveData<Boolean>
+        get() = _navigateToGallery
 
     /**
      * Set _captureImage to true when capture button is clicked.
@@ -43,6 +45,20 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun onCaptureButtonFinished() {
         _captureImage.value = false
+    }
+
+    /**
+     * Set _navigateToGallery to true when capture button is clicked.
+     */
+    fun onGalleryButtonClicked() {
+        _navigateToGallery.value = true
+    }
+
+    /**
+     * Set _navigateToGallery to false when navigating to the Gallery fragment is done.
+     */
+    fun onGalleryButtonFinished() {
+        _navigateToGallery.value = false
     }
 
     /**

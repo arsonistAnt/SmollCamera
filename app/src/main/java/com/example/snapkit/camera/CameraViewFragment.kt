@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
+import com.example.snapkit.R
 import com.example.snapkit.databinding.FragmentCameraViewBinding
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
@@ -24,7 +26,7 @@ class CameraViewFragment : Fragment() {
         binding = FragmentCameraViewBinding.inflate(layoutInflater)
         viewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
         binding.viewModel = viewModel
-        binding.lifecycleOwner = this
+        //binding.lifecycleOwner = this
 
         // Setup the CameraView
         initCameraView()
@@ -76,6 +78,16 @@ class CameraViewFragment : Fragment() {
                 camera.takePicture()
                 viewModel.onCaptureButtonFinished()
             }
+        })
+
+        // Handle navigation when user clicks the gallery button.
+        viewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { navigateToGallery ->
+            if (navigateToGallery) {
+                var navController = findNavController()
+                navController.navigate(R.id.action_cameraViewFragment2_to_imageGalleryFragment)
+                viewModel.onGalleryButtonFinished()
+            }
+
         })
 
         // Tell the fragment to start the save file animation.

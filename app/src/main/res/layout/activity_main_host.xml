@@ -4,14 +4,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".MainPageViewer">
+            tools:context=".ActivityMainHost">
 
 
-        <androidx.viewpager.widget.ViewPager
-                android:id="@+id/pager_main_menu"
+        <fragment
+                android:name="androidx.navigation.fragment.NavHostFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-        </androidx.viewpager.widget.ViewPager>
-
+                android:layout_height="match_parent" app:navGraph="@navigation/main_nav_graph" app:defaultNavHost="true"
+                android:id="@+id/fragment"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

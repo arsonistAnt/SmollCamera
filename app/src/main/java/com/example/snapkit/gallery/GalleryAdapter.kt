@@ -9,7 +9,7 @@ import com.bumptech.glide.Glide
 import com.example.snapkit.databinding.PhotoViewItemBinding
 import com.example.snapkit.domain.ImageFile
 
-class GalleryAdapter :
+class GalleryAdapter(val onClickListener: OnClickThumbnailListener) :
     ListAdapter<ImageFile, GalleryAdapter.PhotoViewHolder>(DiffImageFileCallBack) {
 
     class PhotoViewHolder(var photo: PhotoViewItemBinding) : RecyclerView.ViewHolder(photo.root) {
@@ -40,9 +40,22 @@ class GalleryAdapter :
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         var imageView = holder.photo.photoView
+        var filePath = getItem(position).filePath
+        imageView.setOnClickListener {
+            onClickListener.onClick(getItem(position).filePath)
+        }
+
+        // TODO: Move this glide implementation into the BindingAdapter.kt.
         Glide.with(imageView.context)
-            .load(getItem(position).filePath)
+            .load(filePath)
             .centerCrop()
             .into(imageView)
+    }
+}
+
+class OnClickThumbnailListener(var onClickListener: (filePath: String) -> Unit) {
+
+    fun onClick(filePath: String) {
+        onClickListener(filePath)
     }
 }
