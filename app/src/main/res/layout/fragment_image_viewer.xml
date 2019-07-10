@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools">
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <ImageView
+                android:layout_width="match_parent"
+                tools:ignore="ContentDescription"
+                android:layout_height="match_parent"
+                android:id="@+id/image_viewer"
+                android:background="#000000" tools:srcCompat="@tools:sample/avatars"/>
+    </LinearLayout>
+</layout>

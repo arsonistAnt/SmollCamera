@@ -61,7 +61,7 @@ class MainPageViewer : AppCompatActivity() {
     }
 
     private inner class MenuSlidePageAdapter(fragmentManager: FragmentManager):
-            FragmentStatePagerAdapter(fragmentManager) {
+        FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
         override fun getItem(position: Int): Fragment =
             when(position){

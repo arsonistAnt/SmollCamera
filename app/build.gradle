@@ -6,6 +6,8 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: "androidx.navigation.safeargs.kotlin"
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -57,8 +59,10 @@ dependencies {
     kapt "androidx.room:room-compiler:2.1.0"
     implementation "androidx.room:room-ktx:2.1.0"
 
-
+    //  Provides a backport of the Java SE 8 date-time classes to Java SE 6 and 7.
     implementation 'org.threeten:threetenbp:1.4.0'
 
-
+    // Navigation Component
+    implementation "androidx.navigation:navigation-fragment-ktx:2.1.0-alpha06"
+    implementation "androidx.navigation:navigation-ui-ktx:2.1.0-alpha06"
 }
