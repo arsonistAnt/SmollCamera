@@ -44,11 +44,6 @@ class CameraViewFragment : Fragment() {
         // Initialize the object with data binding.
         camera = binding.camera
         camera.setLifecycleOwner(viewLifecycleOwner)
-        /**
-         * The preview image should be instantly available to the user, hence taking the snapshot first which is quicker to process.
-         * After the snapshot has been taken another call will take a high quality photo which will take longer to process. Eventually this fix should be
-         * optimized/refactored by modifying the CameraView library to handle pausing the PreviewSurface.
-         */
         camera.addCameraListener(object : CameraListener() {
             //TODO: Handle when user interrupts snapshot process via home button or swiping up on the home button.
             override fun onPictureTaken(result: PictureResult) {

@@ -7,6 +7,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <!--TODO: remove later, this is for testing purposes-->
         <Button
                 android:text="Refresh"
                 android:layout_width="wrap_content"

@@ -1,4 +1,4 @@
-package com.example.snapkit.gallery
+package com.example.snapkit.thumbnailgallery
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -15,18 +15,21 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-
-class ImageGalleryViewModel(application: Application) : AndroidViewModel(application) {
-    // Store the ImageFile objects to observe for changes.
-    var imageFiles: LiveData<List<ImageFile>>
-    private var db: MediaFileDatabase = getDatabase(application)
+/**
+ * A class to share Media information across all fragments, this will be considered the main source of truth.
+ */
+class SharedGalleryViewModel(application: Application) : AndroidViewModel(application) {
+    // Store cached media file info into a live data.
+    var mediaFiles: LiveData<List<ImageFile>>
     // Co-routine variables.
     private var viewModelJob = Job()
     private var viewModelScope = CoroutineScope(viewModelJob)
+    // Initialize the media cache Room Database
+    private var mediaDB: MediaFileDatabase = getDatabase(application)
 
     init {
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
-        imageFiles = Transformations.map(db.mediaFileDao().getMediaFiles()) { mediaFiles ->
+        mediaFiles = Transformations.map(mediaDB.mediaFileDao().getMediaFiles()) { mediaFiles ->
             mediaFiles.toImageFiles()
         }
     }
@@ -41,19 +44,19 @@ class ImageGalleryViewModel(application: Application) : AndroidViewModel(applica
             var mediaStoreFiles = async {
                 getImagesFromMediaStore(getApplication()).toMediaFiles()
             }
-            // Fetch the cached files from the room db.
+            // Fetch the cached files from the room mediaDB.
             var cachedFiles = async {
-                db.mediaFileDao().getMediaFilesAsync()
+                mediaDB.mediaFileDao().getMediaFilesAsync()
             }
             // Remove any stale records from the database.
             if (cachedFiles.await().size != mediaStoreFiles.await().size) {
                 var updatedFiles = mediaStoreFiles.await()
                 var staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
 
-                db.mediaFileDao().delete(staleFiles)
+                mediaDB.mediaFileDao().delete(staleFiles)
             }
             // Upsert the newly fetched files to the database.
-            db.mediaFileDao().insertAll(mediaStoreFiles.await())
+            mediaDB.mediaFileDao().insertAll(mediaStoreFiles.await())
         }
     }
 }

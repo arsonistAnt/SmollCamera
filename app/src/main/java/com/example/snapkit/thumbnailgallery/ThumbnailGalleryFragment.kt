@@ -1,4 +1,4 @@
-package com.example.snapkit.gallery
+package com.example.snapkit.thumbnailgallery
 
 import android.graphics.Color
 import android.os.Bundle
@@ -11,23 +11,20 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.snapkit.databinding.FragmentImageGalleryViewBinding
+import com.example.snapkit.databinding.FragmentThumbnailGalleryViewBinding
 
-class ImageGalleryFragment: Fragment() {
-    lateinit var binding:FragmentImageGalleryViewBinding
-    lateinit var viewModel: ImageGalleryViewModel
+class ThumbnailGalleryFragment : Fragment() {
+    lateinit var binding: FragmentThumbnailGalleryViewBinding
+    lateinit var sharedGallery: SharedGalleryViewModel
     lateinit var galleryAdapter: GalleryAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentImageGalleryViewBinding.inflate(layoutInflater)
-
+        binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
         initRecyclerView()
         initViewModel()
-
         binding.button.setOnClickListener {
-            viewModel.updateImageFiles()
+            sharedGallery.updateImageFiles()
         }
-
         return binding.root
     }
 
@@ -40,14 +37,11 @@ class ImageGalleryFragment: Fragment() {
         galleryAdapter = GalleryAdapter(OnClickThumbnailListener { filePath ->
             // Navigate to the ImageViewer when any of the image thumbnail is clicked.
             var navController = findNavController()
-            var actionToImageViewer =
-                ImageGalleryFragmentDirections.actionImageGalleryFragmentToImageViewerFragment(filePath)
-            navController.navigate(actionToImageViewer)
-
             // Pass the filePath args to the ImageViewerFragment using safe args.
-
+            var actionToImageViewer =
+                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToImageViewerFragment(filePath)
+            navController.navigate(actionToImageViewer)
         })
-
         // Recycler view needs a layout manager and a user defined Adapter class that extends RecyclerAdapter.
         binding.galleryRecyclerView.apply {
             setLayoutManager(layoutManager)
@@ -60,7 +54,6 @@ class ImageGalleryFragment: Fragment() {
                     galleryAdapter.notifyItemMoved(positionStart, 0)
                 }
             }
-
         })
     }
 
@@ -68,14 +61,15 @@ class ImageGalleryFragment: Fragment() {
      * Setup the ViewModel and any observable objects.
      */
     private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(ImageGalleryViewModel::class.java)
-        viewModel.imageFiles.observe(viewLifecycleOwner, Observer { imageFiles ->
-            galleryAdapter.submitList(imageFiles)
+        sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
 
+        sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { thumbnailFiles ->
+            galleryAdapter.submitList(thumbnailFiles)
         })
 
-        //Update the cached data to the latest changes from the MediaStore.
-        viewModel.updateImageFiles()
+        // Update the cached data to the latest changes from the MediaStore.
+        // This is the initial time that the data will be fetched from the database.
+        sharedGallery.updateImageFiles()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

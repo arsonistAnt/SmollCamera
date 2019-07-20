@@ -9,7 +9,7 @@
         <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="140dp" app:srcCompat="?attr/colorError"
-                android:id="@+id/photo_view"
+                android:id="@+id/thumbnail_view"
                 android:padding="1dp"
                 tools:ignore="ContentDescription"/>
 

@@ -2,7 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/main_nav_graph" app:startDestination="@id/cameraViewFragment2">
-    <fragment android:id="@+id/imageGalleryFragment" android:name="com.example.snapkit.gallery.ImageGalleryFragment"
+    <fragment android:id="@+id/imageGalleryFragment"
+              android:name="com.example.snapkit.thumbnailgallery.ThumbnailGalleryFragment"
               android:label="ImageGalleryFragment">
         <action android:id="@+id/action_imageGalleryFragment_to_imageViewerFragment"
                 app:destination="@id/imageViewerFragment"/>
@@ -15,7 +16,8 @@
                 app:popExitAnim="@anim/nav_default_pop_exit_anim" app:popUpTo="@+id/cameraViewFragment2"
                 app:popUpToInclusive="false"/>
     </fragment>
-    <fragment android:id="@+id/imageViewerFragment" android:name="com.example.snapkit.gallery.ImageViewerFragment"
+    <fragment android:id="@+id/imageViewerFragment"
+              android:name="com.example.snapkit.thumbnailgallery.ImageViewerFragment"
               android:label="ImageViewerFragment">
         <argument android:name="filePath" app:argType="string" app:nullable="true"/>
     </fragment>

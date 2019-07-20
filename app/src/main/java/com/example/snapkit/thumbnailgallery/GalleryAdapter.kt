@@ -1,4 +1,4 @@
-package com.example.snapkit.gallery
+package com.example.snapkit.thumbnailgallery
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,16 +6,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.snapkit.databinding.PhotoViewItemBinding
+import com.example.snapkit.databinding.ThumbnailViewItemBinding
 import com.example.snapkit.domain.ImageFile
 
-class GalleryAdapter(val onClickListener: OnClickThumbnailListener) :
+class GalleryAdapter(private val onClickListener: OnClickThumbnailListener) :
     ListAdapter<ImageFile, GalleryAdapter.PhotoViewHolder>(DiffImageFileCallBack) {
 
-    class PhotoViewHolder(var photo: PhotoViewItemBinding) : RecyclerView.ViewHolder(photo.root) {
+    class PhotoViewHolder(var thumbnail: ThumbnailViewItemBinding) : RecyclerView.ViewHolder(thumbnail.root) {
         // TODO: Provide image URI info, this is for later use.
         fun bind() {
-            photo.executePendingBindings()
+            thumbnail.executePendingBindings()
         }
     }
 
@@ -34,12 +34,12 @@ class GalleryAdapter(val onClickListener: OnClickThumbnailListener) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return PhotoViewHolder(PhotoViewItemBinding.inflate(layoutInflater))
+        return PhotoViewHolder(ThumbnailViewItemBinding.inflate(layoutInflater))
     }
 
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-        var imageView = holder.photo.photoView
+        var imageView = holder.thumbnail.thumbnailView
         var filePath = getItem(position).filePath
         imageView.setOnClickListener {
             onClickListener.onClick(getItem(position).filePath)

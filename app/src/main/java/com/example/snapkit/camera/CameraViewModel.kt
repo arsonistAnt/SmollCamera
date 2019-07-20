@@ -73,7 +73,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             var imageFile = generateImageFile(imageDirectory!!)
             imageResult.let {
                 it.toFile(imageFile) {
-                    //TODO: Store in DB here
                     scanForMediaFiles(getApplication(), arrayOf(imageFile.path), ::insertFileToCache)
                     storeFileComplete()
                 }
@@ -83,6 +82,12 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Stores the file path into the Room database.
+     *
+     * @param context the context.
+     * @param filePath the file path string.
+     */
     private fun insertFileToCache(context: Context, filePath: String) {
         var imageFile = getImageFromMediaStore(context, filePath)
         var db = getDatabase(context).mediaFileDao()
