@@ -1,4 +1,4 @@
-package com.example.snapkit.thumbnailgallery
+package com.example.snapkit
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -7,9 +7,6 @@ import androidx.lifecycle.Transformations
 import com.example.snapkit.database.MediaFileDatabase
 import com.example.snapkit.database.getDatabase
 import com.example.snapkit.domain.ImageFile
-import com.example.snapkit.getImagesFromMediaStore
-import com.example.snapkit.toImageFiles
-import com.example.snapkit.toMediaFiles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async

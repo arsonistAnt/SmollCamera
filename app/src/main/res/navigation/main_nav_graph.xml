@@ -5,8 +5,8 @@
     <fragment android:id="@+id/imageGalleryFragment"
               android:name="com.example.snapkit.thumbnailgallery.ThumbnailGalleryFragment"
               android:label="ImageGalleryFragment">
-        <action android:id="@+id/action_imageGalleryFragment_to_imageViewerFragment"
-                app:destination="@id/imageViewerFragment"/>
+        <action android:id="@+id/action_imageGalleryFragment_to_mediaViewPagerFragment"
+                app:destination="@id/mediaViewPagerFragment"/>
     </fragment>
     <fragment android:id="@+id/cameraViewFragment2" android:name="com.example.snapkit.camera.CameraViewFragment"
               android:label="CameraViewFragment">
@@ -16,9 +16,9 @@
                 app:popExitAnim="@anim/nav_default_pop_exit_anim" app:popUpTo="@+id/cameraViewFragment2"
                 app:popUpToInclusive="false"/>
     </fragment>
-    <fragment android:id="@+id/imageViewerFragment"
-              android:name="com.example.snapkit.thumbnailgallery.ImageViewerFragment"
-              android:label="ImageViewerFragment">
-        <argument android:name="filePath" app:argType="string" app:nullable="true"/>
+    <fragment android:id="@+id/mediaViewPagerFragment"
+              android:name="com.example.snapkit.mediaviewer.MediaViewPagerFragment"
+              android:label="MediaViewPagerFragment">
+        <argument android:name="position" app:argType="integer"/>
     </fragment>
 </navigation>
