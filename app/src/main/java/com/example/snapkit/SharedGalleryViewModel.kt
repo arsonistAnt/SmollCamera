@@ -7,6 +7,9 @@ import androidx.lifecycle.Transformations
 import com.example.snapkit.database.MediaFileDatabase
 import com.example.snapkit.database.getDatabase
 import com.example.snapkit.domain.ImageFile
+import com.example.snapkit.utils.getImagesFromMediaStore
+import com.example.snapkit.utils.toImageFiles
+import com.example.snapkit.utils.toMediaFiles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -38,17 +41,17 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     fun updateImageFiles() {
         viewModelScope.launch {
             // Fetch the latest files from the media store.
-            var mediaStoreFiles = async {
+            val mediaStoreFiles = async {
                 getImagesFromMediaStore(getApplication()).toMediaFiles()
             }
             // Fetch the cached files from the room mediaDB.
-            var cachedFiles = async {
+            val cachedFiles = async {
                 mediaDB.mediaFileDao().getMediaFilesAsync()
             }
             // Remove any stale records from the database.
             if (cachedFiles.await().size != mediaStoreFiles.await().size) {
-                var updatedFiles = mediaStoreFiles.await()
-                var staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
+                val updatedFiles = mediaStoreFiles.await()
+                val staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
 
                 mediaDB.mediaFileDao().delete(staleFiles)
             }

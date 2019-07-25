@@ -8,10 +8,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.snapkit.database.MediaFile
 import com.example.snapkit.database.getDatabase
-import com.example.snapkit.generateImageFile
-import com.example.snapkit.getDCIMDirectory
-import com.example.snapkit.getImageFromMediaStore
-import com.example.snapkit.scanForMediaFiles
+import com.example.snapkit.utils.generateImageFile
+import com.example.snapkit.utils.getDCIMDirectory
+import com.example.snapkit.utils.getImageFromMediaStore
+import com.example.snapkit.utils.scanForMediaFiles
 import com.otaliastudios.cameraview.PictureResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -69,11 +69,15 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
         // Write image to the DCIM directory.
         try {
-            var imageDirectory = getDCIMDirectory()
-            var imageFile = generateImageFile(imageDirectory!!)
+            val imageDirectory = getDCIMDirectory()
+            val imageFile = generateImageFile(imageDirectory!!)
             imageResult.let {
                 it.toFile(imageFile) {
-                    scanForMediaFiles(getApplication(), arrayOf(imageFile.path), ::insertFileToCache)
+                    scanForMediaFiles(
+                        getApplication(),
+                        arrayOf(imageFile.path),
+                        ::insertFileToCache
+                    )
                     storeFileComplete()
                 }
             }
@@ -89,8 +93,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
      * @param filePath the file path string.
      */
     private fun insertFileToCache(context: Context, filePath: String) {
-        var imageFile = getImageFromMediaStore(context, filePath)
-        var db = getDatabase(context).mediaFileDao()
+        val imageFile = getImageFromMediaStore(context, filePath)
+        val db = getDatabase(context).mediaFileDao()
         CoroutineScope(Job()).launch {
             imageFile?.let {
                 db.insertMediaFile(MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong))

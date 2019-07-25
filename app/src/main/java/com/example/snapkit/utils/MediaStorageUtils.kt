@@ -1,11 +1,10 @@
-package com.example.snapkit
+package com.example.snapkit.utils
 
 import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import com.example.snapkit.database.MediaFile
 import com.example.snapkit.domain.ImageFile
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -57,11 +56,12 @@ fun getSystemTimeStamp(): String = SimpleDateFormat("ddMMyyyy_HHmmss").format(Da
  *
  * @param context the application context.
  * @param filePaths a string array of file paths.
+ * @param callBack a function call back that takes the context and filePath.
  */
 fun scanForMediaFiles(
     context: Context,
     filePaths: Array<String>,
-    dbCallBack: (context: Context, filePath: String) -> Unit
+    callBack: (context: Context, filePath: String) -> Unit
 ) {
     try {
         MediaScannerConnection.scanFile(
@@ -70,9 +70,8 @@ fun scanForMediaFiles(
             null
         ) { filePath, uri ->
             if (uri != null) {
-                dbCallBack(context, filePath)
+                callBack(context, filePath)
             }
-
         }
     } catch (e: Exception) {
         Log.e(CLASS_TAG, e.message)
@@ -81,31 +80,31 @@ fun scanForMediaFiles(
 }
 
 /**
- * Use the MediaStore content resolver to retrieve URI data about the image store on the android device.
+ * Get a list of Image data from the MediaStore.
  *
  * @param context the context where the function was called.
  * @return a list of image file URIs.
  */
 fun getImagesFromMediaStore(context: Context): List<ImageFile> {
-    var dataColumns = arrayOf(
+    val dataColumns = arrayOf(
         MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED,
         MediaStore.Images.Media.DATE_TAKEN, MediaStore.Images.Media.DATE_ADDED
     )
     // Select this table located at this URI.
-    var select = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val select = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     // Order by
-    var orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC"
-    var contentResolver = context.contentResolver
-    var mCursor = contentResolver.query(select, dataColumns, null, null, orderBy)
-    var filePaths = arrayListOf<ImageFile>()
+    val orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC"
+    val contentResolver = context.contentResolver
+    val mCursor = contentResolver?.query(select, dataColumns, null, null, orderBy)
+    val filePaths = arrayListOf<ImageFile>()
 
-    mCursor.apply {
-        var dataUriIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
-        var dateAddedIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
+    mCursor?.let {
+        val dataUriIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
+        val dateAddedIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
 
-        while (moveToNext()) {
-            var dateAddedString = getString(dateAddedIndex)
-            var dataUriString = getString(dataUriIndex)
+        while (it.moveToNext()) {
+            val dateAddedString = it.getString(dateAddedIndex)
+            val dataUriString = it.getString(dataUriIndex)
             val dateTaken =
                 Instant.ofEpochMilli(dateAddedString.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
             val dateFormat = dateTaken.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH))
@@ -113,31 +112,38 @@ fun getImagesFromMediaStore(context: Context): List<ImageFile> {
             filePaths.add(ImageFile(dataUriString, dateFormat, timeFormat, dateAddedString.toLong()))
         }
     }
+    mCursor?.close()
     return filePaths
 }
 
 
+/**
+ * Get
+ *
+ * @param context the context where the function was called.
+ * @return an ImageFile object.
+ */
 fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
-    var dataColumns = arrayOf(
+    val dataColumns = arrayOf(
         MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED,
         MediaStore.Images.Media.DATE_TAKEN
     )
     // Select this table located at this URI.
-    var select = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-    var dataString = MediaStore.Images.Media.DATA
+    val select = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val dataString = MediaStore.Images.Media.DATA
     // Order by
-    var orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC"
-    var contentResolver = context.contentResolver
-    var mCursor = contentResolver.query(select, dataColumns, "$dataString = ?", arrayOf(fileName), orderBy)
+    val orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC"
+    val contentResolver = context.contentResolver
+    val mCursor = contentResolver.query(select, dataColumns, "$dataString = ?", arrayOf(fileName), orderBy)
     var imageFile: ImageFile? = null
 
-    mCursor.apply {
-        var dataUriIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
-        var dateTakenIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
+    mCursor?.let {
+        val dataUriIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATA)
+        val dateTakenIndex = mCursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
 
-        while (moveToNext()) {
-            var dateTakenString = getString(dateTakenIndex)
-            var dataUriString = getString(dataUriIndex)
+        while (it.moveToNext()) {
+            val dateTakenString = it.getString(dateTakenIndex)
+            val dataUriString = it.getString(dataUriIndex)
             val dateTaken =
                 Instant.ofEpochMilli(dateTakenString.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
             val dateFormat = dateTaken.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH))
@@ -145,25 +151,7 @@ fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
             imageFile = ImageFile(dataUriString, dateFormat, timeFormat, dateTakenString.toLong())
         }
     }
+    mCursor?.close()
     return imageFile
-}
-
-
-/**
- * Convert database entity to a list of ImageFile POJO's.
- */
-fun List<MediaFile>.toImageFiles(): List<ImageFile> {
-    return map {
-        ImageFile(it.uri, it.creationDate, it.creationTime, it.dateTakenLong)
-    }
-}
-
-/**
- * Convert ImageFile list to a list MediaFile entities.
- */
-fun List<ImageFile>.toMediaFiles(): List<MediaFile> {
-    return map {
-        MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong)
-    }
 }
 
