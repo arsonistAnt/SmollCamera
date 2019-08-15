@@ -33,6 +33,25 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     val navigateToGallery: LiveData<Boolean>
         get() = _navigateToGallery
 
+    // If the user has granted permissions for the CameraViewFragment.
+    private val _isCameraInitialized = MutableLiveData<Boolean>()
+    val isCameraInitialized: LiveData<Boolean>
+        get() = _isCameraInitialized
+
+    /**
+     * Set _captureImage to true when capture button is clicked.
+     */
+    fun cameraInitialized() {
+        _isCameraInitialized.value = true
+    }
+
+    /**
+     * Set _isCameraInitialized to false when user has not yet provided permissions for this fragment.
+     */
+    fun cameraNotInitialized() {
+        _isCameraInitialized.value = false
+    }
+
     /**
      * Set _captureImage to true when capture button is clicked.
      */
@@ -62,7 +81,32 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Set _inImagePreviewState to true when the image file is done saving to the Media Storage.
+     */
+    private fun storeFileComplete() {
+        _savingFile.value = false
+    }
+
+    /**
+     * Stores the file path into the Room database.
+     *
+     * @param context the context.
+     * @param filePath the file path string.
+     */
+    private fun insertFileToCache(context: Context, filePath: String) {
+        val imageFile = getImageFromMediaStore(context, filePath)
+        val db = getDatabase(context).mediaFileDao()
+        CoroutineScope(Job()).launch {
+            imageFile?.let {
+                db.insertMediaFile(MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong))
+            }
+        }
+    }
+
+    /**
      * Write the image file to the image directory and set _savingFile to true.
+     *
+     * @param imageResult the PictureResult object that will be written to the image directory.
      */
     fun storeFile(imageResult: PictureResult) {
         _savingFile.value = true
@@ -84,28 +128,5 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         } catch (e: Exception) {
             Log.e("CameraViewModel", e.message)
         }
-    }
-
-    /**
-     * Stores the file path into the Room database.
-     *
-     * @param context the context.
-     * @param filePath the file path string.
-     */
-    private fun insertFileToCache(context: Context, filePath: String) {
-        val imageFile = getImageFromMediaStore(context, filePath)
-        val db = getDatabase(context).mediaFileDao()
-        CoroutineScope(Job()).launch {
-            imageFile?.let {
-                db.insertMediaFile(MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong))
-            }
-        }
-    }
-
-    /**
-     * Set _inImagePreviewState to true when the image file is done saving to the Media Storage.
-     */
-    private fun storeFileComplete() {
-        _savingFile.value = false
     }
 }

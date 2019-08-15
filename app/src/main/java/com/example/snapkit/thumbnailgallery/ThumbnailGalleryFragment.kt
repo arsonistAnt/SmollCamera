@@ -28,7 +28,7 @@ class ThumbnailGalleryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
-
+        initViewModel()
         initRecyclerView()
         binding.button.setOnClickListener {
             sharedGallery.updateImageFiles()
@@ -44,25 +44,27 @@ class ThumbnailGalleryFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        // Make sure user has given access to storage permissions before opening the thumbnail gallery.
+        // Make sure user has given access to storage permissions before updating the thumbnail gallery.
         checkPermissionForStorage()
     }
 
     /**
-     * Before opening the gallery check if user has the permissions.
+     * Before updating the gallery, check if user has the permissions.
      */
     private fun checkPermissionForStorage() {
         // Permissions need to be requested at runtime if API level >= 23
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (!hasPermissions(requireContext(), permission)) {
                 val thumbnailGalleryDialog = getAlertDialog(requireContext())
-                thumbnailGalleryDialog.setMessage(getString(R.string.gallery_dialog_message))
+                thumbnailGalleryDialog.setMessage(getString(R.string.storage_dialog_message))
                 thumbnailGalleryDialog.setTitle(R.string.permissions_dialog_title)
 
                 // Request user for permission before opening the gallery.
                 requestForPermissions(requireActivity(), thumbnailGalleryDialog, permission)
             } else {
-                initViewModel()
+                // Update the cached data to the latest changes from the MediaStore.
+                // This is the initial time that the data will be fetched from the database.
+                sharedGallery.updateImageFiles()
             }
         }
     }
@@ -72,7 +74,7 @@ class ThumbnailGalleryFragment : Fragment() {
      * GridLayoutManager & ThumbnailGalleryAdapter is also initialized in this code block.
      */
     private fun initRecyclerView() {
-        var layoutManager = GridLayoutManager(requireContext(), 3)
+        val layoutManager = GridLayoutManager(requireContext(), 3)
         thumbnailGalleryAdapter = ThumbnailGalleryAdapter(OnClickThumbnailListener { clickPosition ->
             // Navigate to the ImageViewer when any of the image thumbnail is clicked.
             val navController = findNavController()
@@ -105,9 +107,5 @@ class ThumbnailGalleryFragment : Fragment() {
         sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { thumbnailFiles ->
             thumbnailGalleryAdapter.submitList(thumbnailFiles)
         })
-
-        // Update the cached data to the latest changes from the MediaStore.
-        // This is the initial time that the data will be fetched from the database.
-        sharedGallery.updateImageFiles()
     }
 }

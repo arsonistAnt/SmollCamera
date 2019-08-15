@@ -9,9 +9,10 @@
 
         <!--TODO: remove later, this is for testing purposes-->
         <Button
-                android:text="Refresh"
+                android:text="@string/refresh_temp_delete_later"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/button"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
                 app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="@+id/gallery_recycler_view"/>

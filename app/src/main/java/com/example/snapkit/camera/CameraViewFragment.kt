@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.example.snapkit.R
 import com.example.snapkit.databinding.FragmentCameraViewBinding
+import com.example.snapkit.utils.PermissionUtilsCallbacks
 import com.example.snapkit.utils.getAlertDialog
 import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
@@ -20,9 +21,14 @@ import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
 
 class CameraViewFragment : Fragment() {
-    lateinit var binding: FragmentCameraViewBinding
-    lateinit var viewModel: CameraViewModel
-    lateinit var camera: CameraView
+    private lateinit var binding: FragmentCameraViewBinding
+    private lateinit var viewModel: CameraViewModel
+    private lateinit var camera: CameraView
+
+    // A flag to check if the user is coming back from the permission Dialog prompt.
+    private var fromDialog = false
+
+    // Permissions needed for this fragment.
     private val permissions = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
@@ -34,7 +40,10 @@ class CameraViewFragment : Fragment() {
         binding = FragmentCameraViewBinding.inflate(layoutInflater)
         viewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
         binding.viewModel = viewModel
-        //binding.lifecycleOwner = this
+
+        if (hasPermissions(requireContext(), *permissions)) {
+            initCameraView()
+        }
 
         // Observe the values from the viewModel.
         initObservers()
@@ -54,15 +63,25 @@ class CameraViewFragment : Fragment() {
     private fun checkPermissionsForCamera() {
         // Permissions need to be requested at runtime if API level >= 23
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (!hasPermissions(requireContext(), *permissions)) {
+            val permsGranted = hasPermissions(requireContext(), *permissions)
+            if (!permsGranted) {
                 val cameraAlertDialog = getAlertDialog(requireContext())
                 cameraAlertDialog.setMessage(getString(R.string.camera_dialog_message))
                 cameraAlertDialog.setTitle(R.string.permissions_dialog_title)
+                val permCallBacks = object : PermissionUtilsCallbacks() {
+                    override fun onPermissionsPermanentlyDenied() {
+                        cameraAlertDialog.show()
+                        fromDialog = true
+                    }
 
+                    override fun onAllPermissionsAccepted() = viewModel.cameraNotInitialized()
+                }
                 // Request user for permission before opening the camera.
-                requestForPermissions(requireActivity(), cameraAlertDialog, *permissions)
-            } else {
-                initCameraView()
+                requestForPermissions(requireActivity(), permCallBacks, *permissions)
+            }
+            // Check if user came from the permanently denied dialog and has allowed all permissions.
+            else if (fromDialog && permsGranted) {
+                viewModel.cameraNotInitialized()
             }
         }
     }
@@ -105,10 +124,18 @@ class CameraViewFragment : Fragment() {
             }
         })
 
+        // Ensure that CameraView is only initialized once after permissions have been granted.
+        viewModel.isCameraInitialized.observe(viewLifecycleOwner, Observer { isInitialized ->
+            if (!isInitialized && hasPermissions(requireContext(), *permissions)) {
+                initCameraView()
+                viewModel.cameraInitialized()
+            }
+        })
+
         // Handle navigation when user clicks the gallery button.
         viewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { navigateToGallery ->
             if (navigateToGallery) {
-                var navController = findNavController()
+                val navController = findNavController()
                 navController.navigate(R.id.action_cameraViewFragment2_to_imageGalleryFragment)
                 viewModel.onGalleryButtonFinished()
             }

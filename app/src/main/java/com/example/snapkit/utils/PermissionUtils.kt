@@ -89,6 +89,39 @@ fun requestForPermissions(activity: Activity, permDeniedDialog: AlertDialog, var
 }
 
 /**
+ * Use the Dexter library to request multiple permissions. If the user denies all permissions then the application itself
+ * will go into the background. If the user permanently denies a permission then a AlertDialog will be shown.
+ *
+ * @param activity the activity
+ * @param permCallBack the PermissionsUtils object callback for when permissions are denied or accepted.
+ * @param perms the list of permissions to request from the user
+ */
+fun requestForPermissions(activity: Activity, permCallBack: PermissionUtilsCallbacks, vararg perms: String) {
+    Dexter.withActivity(activity)
+        .withPermissions(*perms)
+        .withListener(object : MultiplePermissionsListener {
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                report?.let {
+                    when {
+                        it.isAnyPermissionPermanentlyDenied -> permCallBack.onPermissionsPermanentlyDenied()
+                        it.deniedPermissionResponses.size > 0 -> openHome(activity)
+                        it.areAllPermissionsGranted() -> permCallBack.onAllPermissionsAccepted()
+                    }
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                permissions: MutableList<PermissionRequest>?,
+                token: PermissionToken?
+            ) {
+                token?.continuePermissionRequest()
+            }
+        })
+        .withErrorListener { error -> Log.e("Dexter", "There was an error: $error") }
+        .check()
+}
+
+/**
  * Explicit intent to the home menu on the mobile phone.
  *
  * @param activity the activity
@@ -98,5 +131,22 @@ fun openHome(activity: Activity) {
     startMain.addCategory(Intent.CATEGORY_HOME)
     startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
     activity.startActivity(startMain)
+}
+
+/**
+ * The PermissionsUtilCallback class is used for finer tuning of how to handle all accepted permissions
+ * or all permanently denied permissions. By default if more than one permissions are denied the PermissionsUtil
+ * package will take the user to the home screen.
+ */
+abstract class PermissionUtilsCallbacks {
+    /**
+     * Abstract function for when the user has permanently denied any permission.
+     */
+    abstract fun onPermissionsPermanentlyDenied()
+
+    /**
+     * Abstract function for when the user has accepted ALL permissions.
+     */
+    abstract fun onAllPermissionsAccepted()
 }
 
