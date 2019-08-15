@@ -1,5 +1,6 @@
 package com.example.snapkit.thumbnailgallery
 
+import android.Manifest
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,22 +12,59 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.databinding.FragmentThumbnailGalleryViewBinding
+import com.example.snapkit.utils.getAlertDialog
+import com.example.snapkit.utils.hasPermissions
+import com.example.snapkit.utils.requestForPermissions
 
 class ThumbnailGalleryFragment : Fragment() {
     lateinit var binding: FragmentThumbnailGalleryViewBinding
     lateinit var sharedGallery: SharedGalleryViewModel
     lateinit var thumbnailGalleryAdapter: ThumbnailGalleryAdapter
 
+    private val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
+
         initRecyclerView()
-        initViewModel()
         binding.button.setOnClickListener {
             sharedGallery.updateImageFiles()
         }
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Set the color of the background to white.
+        view.setBackgroundColor(Color.WHITE)
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Make sure user has given access to storage permissions before opening the thumbnail gallery.
+        checkPermissionForStorage()
+    }
+
+    /**
+     * Before opening the gallery check if user has the permissions.
+     */
+    private fun checkPermissionForStorage() {
+        // Permissions need to be requested at runtime if API level >= 23
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (!hasPermissions(requireContext(), permission)) {
+                val thumbnailGalleryDialog = getAlertDialog(requireContext())
+                thumbnailGalleryDialog.setMessage(getString(R.string.gallery_dialog_message))
+                thumbnailGalleryDialog.setTitle(R.string.permissions_dialog_title)
+
+                // Request user for permission before opening the gallery.
+                requestForPermissions(requireActivity(), thumbnailGalleryDialog, permission)
+            } else {
+                initViewModel()
+            }
+        }
     }
 
     /**
@@ -35,12 +73,12 @@ class ThumbnailGalleryFragment : Fragment() {
      */
     private fun initRecyclerView() {
         var layoutManager = GridLayoutManager(requireContext(), 3)
-        thumbnailGalleryAdapter = ThumbnailGalleryAdapter(OnClickThumbnailListener { filePath ->
+        thumbnailGalleryAdapter = ThumbnailGalleryAdapter(OnClickThumbnailListener { clickPosition ->
             // Navigate to the ImageViewer when any of the image thumbnail is clicked.
-            var navController = findNavController()
+            val navController = findNavController()
             // Pass the filePath args to the ImageViewerFragment using safe args.
-            var actionToMediaViewPager =
-                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(0)
+            val actionToMediaViewPager =
+                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(clickPosition)
             navController.navigate(actionToMediaViewPager)
         })
         // Recycler view needs a layout manager and a user defined Adapter class that extends RecyclerAdapter.
@@ -71,11 +109,5 @@ class ThumbnailGalleryFragment : Fragment() {
         // Update the cached data to the latest changes from the MediaStore.
         // This is the initial time that the data will be fetched from the database.
         sharedGallery.updateImageFiles()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Set the color of the background to white.
-        view.setBackgroundColor(Color.WHITE)
-        super.onViewCreated(view, savedInstanceState)
     }
 }

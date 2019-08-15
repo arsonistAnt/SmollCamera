@@ -19,7 +19,6 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
         }
     }
 
-
     companion object DiffImageFileCallBack : DiffUtil.ItemCallback<ImageFile>() {
 
         override fun areItemsTheSame(oldItem: ImageFile, newItem: ImageFile): Boolean {
@@ -37,12 +36,11 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
         return ThumbnailViewHolder(ItemThumbnailViewBinding.inflate(layoutInflater))
     }
 
-
     override fun onBindViewHolder(holder: ThumbnailViewHolder, position: Int) {
         var imageView = holder.thumbnail.thumbnailView
         var filePath = getItem(position).filePath
         imageView.setOnClickListener {
-            onClickListener.onClick(getItem(position).filePath)
+            onClickListener.onClick(position)
         }
 
         // TODO: Move this glide implementation into the BindingAdapter.kt.
@@ -53,9 +51,9 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
     }
 }
 
-class OnClickThumbnailListener(var onClickListener: (filePath: String) -> Unit) {
+class OnClickThumbnailListener(var onClickListener: (position: Int) -> Unit) {
 
-    fun onClick(filePath: String) {
-        onClickListener(filePath)
+    fun onClick(position: Int) {
+        onClickListener(position)
     }
 }

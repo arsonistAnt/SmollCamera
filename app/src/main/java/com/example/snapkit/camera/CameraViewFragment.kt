@@ -1,5 +1,6 @@
 package com.example.snapkit.camera
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,15 +12,22 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.example.snapkit.R
 import com.example.snapkit.databinding.FragmentCameraViewBinding
+import com.example.snapkit.utils.getAlertDialog
+import com.example.snapkit.utils.hasPermissions
+import com.example.snapkit.utils.requestForPermissions
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
-
 
 class CameraViewFragment : Fragment() {
     lateinit var binding: FragmentCameraViewBinding
     lateinit var viewModel: CameraViewModel
     lateinit var camera: CameraView
+    private val permissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Setup data binding expressions and objects.
@@ -28,13 +36,35 @@ class CameraViewFragment : Fragment() {
         binding.viewModel = viewModel
         //binding.lifecycleOwner = this
 
-        // Setup the CameraView
-        initCameraView()
         // Observe the values from the viewModel.
         initObservers()
         // Set onClickListeners for states/events that doesn't need to be tracked by the View Model.
         setOnClickListeners()
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        checkPermissionsForCamera()
+    }
+
+    /**
+     * Before opening the camera check if user has the permissions.
+     */
+    private fun checkPermissionsForCamera() {
+        // Permissions need to be requested at runtime if API level >= 23
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (!hasPermissions(requireContext(), *permissions)) {
+                val cameraAlertDialog = getAlertDialog(requireContext())
+                cameraAlertDialog.setMessage(getString(R.string.camera_dialog_message))
+                cameraAlertDialog.setTitle(R.string.permissions_dialog_title)
+
+                // Request user for permission before opening the camera.
+                requestForPermissions(requireActivity(), cameraAlertDialog, *permissions)
+            } else {
+                initCameraView()
+            }
+        }
     }
 
     /**
@@ -88,15 +118,13 @@ class CameraViewFragment : Fragment() {
         // Tell the fragment to start the save file animation.
         viewModel.savingFile.observe(viewLifecycleOwner, Observer { saving ->
             if (saving == true) {
-                //TODO: Start loading animation.
+
             } else {
-                //TODO: End loading animation.
                 Toast.makeText(
                     activity!!.applicationContext,
                     "File saved!",
                     Toast.LENGTH_SHORT
                 ).show()
-                // TODO: Start the media scan as a service that way it will persist even when the user
                 // Re-index the image directory so the media content provider is aware of the newly added file.
                 try {
                 } catch (e: Exception) {
@@ -109,4 +137,6 @@ class CameraViewFragment : Fragment() {
             }
         })
     }
+
+
 }

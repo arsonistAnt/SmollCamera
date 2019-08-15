@@ -19,6 +19,6 @@
     <fragment android:id="@+id/mediaViewPagerFragment"
               android:name="com.example.snapkit.mediaviewer.MediaViewPagerFragment"
               android:label="MediaViewPagerFragment">
-        <argument android:name="position" app:argType="integer"/>
+        <argument android:name="clickPosition" app:argType="integer"/>
     </fragment>
 </navigation>
