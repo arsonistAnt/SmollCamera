@@ -8,7 +8,6 @@ class ActivityMainHost : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.i("OnCreate()")
         setupTimber()
         setContentView(R.layout.activity_main_host)
     }

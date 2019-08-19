@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
-import androidx.viewpager.widget.ViewPager
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
@@ -21,7 +20,7 @@ private const val PAGE_MARGIN = 24
 class MediaViewPagerFragment : Fragment() {
     private lateinit var binding: FragmentMediaViewPagerBinding
     private lateinit var sharedGallery: SharedGalleryViewModel
-    private lateinit var mediaViewPager: ViewPager
+    private lateinit var mediaViewPager: MediaViewPager
     private val safeFragmentArgs: MediaViewPagerFragmentArgs by navArgs()
     private val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 

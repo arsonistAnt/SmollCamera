@@ -83,7 +83,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Set _inImagePreviewState to true when the image file is done saving to the Media Storage.
      */
-    private fun storeFileComplete() {
+    fun storeFileComplete() {
         _savingFile.value = false
     }
 
