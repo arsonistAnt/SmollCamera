@@ -10,7 +10,7 @@ class MediaViewPagerAdapter(private val imageList: List<ImageFile>, fm: Fragment
 
     override fun getItem(position: Int): Fragment {
         val imageFile = imageList[position]
-        return PhotoViewFragment(imageFile.filePath)
+        return PhotoViewFragment().apply { filePath = imageFile.filePath }
     }
 
     override fun getCount(): Int {

@@ -71,4 +71,7 @@ dependencies {
 
     // Dexter Permissions library
     implementation 'com.karumi:dexter:5.0.0'
+
+    // Timber Library
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 }

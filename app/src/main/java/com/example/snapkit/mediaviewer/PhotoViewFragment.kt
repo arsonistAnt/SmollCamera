@@ -9,8 +9,10 @@ import com.bumptech.glide.Glide
 import com.example.snapkit.databinding.FragmentPhotoViewBinding
 
 
-class PhotoViewFragment(private val filePath: String) : Fragment() {
+class PhotoViewFragment : Fragment() {
     private lateinit var photoViewBinding: FragmentPhotoViewBinding
+    var filePath: String? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         photoViewBinding = FragmentPhotoViewBinding.inflate(inflater, container, false)
         return photoViewBinding.root
@@ -25,10 +27,13 @@ class PhotoViewFragment(private val filePath: String) : Fragment() {
      * Set the image for PhotoView using Glide and the private filePath property.
      */
     private fun setPhoto() {
-        var photoView = photoViewBinding.photoView
+        val photoView = photoViewBinding.photoView
 
-        Glide.with(photoView.context)
-            .load(filePath)
-            .into(photoView)
+        filePath?.let {
+            Glide.with(photoView.context)
+                .load(filePath)
+                .into(photoView)
+        }
+
     }
 }
