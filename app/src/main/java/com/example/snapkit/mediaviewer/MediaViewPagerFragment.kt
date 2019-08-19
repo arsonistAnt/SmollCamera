@@ -14,7 +14,6 @@ import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
 import com.example.snapkit.utils.*
-import timber.log.Timber
 
 // Store the page margin value (in dp)
 private const val PAGE_MARGIN = 24
@@ -28,7 +27,6 @@ class MediaViewPagerFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMediaViewPagerBinding.inflate(inflater)
-        Timber.i("OnCreate()")
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
         initMediaPager()
         initObserversShared()
