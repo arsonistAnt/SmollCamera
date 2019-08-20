@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.snapkit.databinding.FragmentPhotoViewBinding
+import kotlin.math.absoluteValue
 
 
 class PhotoViewFragment : Fragment() {
@@ -19,21 +20,32 @@ class PhotoViewFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setPhoto()
+        setupPhotoView()
         super.onViewCreated(view, savedInstanceState)
     }
 
     /**
      * Set the image for PhotoView using Glide and the private filePath property.
      */
-    private fun setPhoto() {
+    private fun setupPhotoView() {
         val photoView = photoViewBinding.photoView
-
+        // Disable paging if PhotoView is zoomed in using a listener.
+        photoView.setOnScaleChangeListener { scaleFactor, focusX, focusY ->
+            // Calculate if the value is close to the expected value.
+            val isValueApproximate = { expectedValue: Float, value: Float ->
+                // The max amount of error that is allowed.
+                val errorMargin = 0.03f
+                val difference = expectedValue - value
+                difference.absoluteValue < errorMargin
+            }
+            val isZoomed = isValueApproximate(photoView.minimumScale, photoView.scale)
+            photoView.setAllowParentInterceptOnEdge(isZoomed)
+        }
+        // Load image into PhotoView
         filePath?.let {
             Glide.with(photoView.context)
                 .load(filePath)
                 .into(photoView)
         }
-
     }
 }
