@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -145,22 +144,7 @@ class CameraViewFragment : Fragment() {
         // Tell the fragment to start the save file animation.
         viewModel.savingFile.observe(viewLifecycleOwner, Observer { saving ->
             if (saving == true) {
-
-            } else {
-                Toast.makeText(
-                    activity!!.applicationContext,
-                    "File saved!",
-                    Toast.LENGTH_SHORT
-                ).show()
-                // Re-index the image directory so the media content provider is aware of the newly added file.
-                try {
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        activity!!.applicationContext,
-                        "Failed to save file!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                //TODO: Animation
             }
         })
     }

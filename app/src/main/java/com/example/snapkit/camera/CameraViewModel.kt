@@ -2,7 +2,7 @@ package com.example.snapkit.camera
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,6 +16,7 @@ import com.otaliastudios.cameraview.PictureResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class CameraViewModel(application: Application) : AndroidViewModel(application) {
     // If the user has clicked on the capture image button.
@@ -83,8 +84,13 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Set _inImagePreviewState to true when the image file is done saving to the Media Storage.
      */
-    fun storeFileComplete() {
+    private fun storeFileComplete() {
         _savingFile.value = false
+        Toast.makeText(
+            getApplication() as Context,
+            "File save complete!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**
@@ -98,7 +104,14 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         val db = getDatabase(context).mediaFileDao()
         CoroutineScope(Job()).launch {
             imageFile?.let {
-                db.insertMediaFile(MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong))
+                db.insertMediaFile(
+                    MediaFile(
+                        it.filePath,
+                        it.dateCreated,
+                        it.timeCreated,
+                        it.dateTakenLong
+                    )
+                )
             }
         }
     }
@@ -126,7 +139,13 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
         } catch (e: Exception) {
-            Log.e("CameraViewModel", e.message)
+            Timber.e("$e")
+            Toast.makeText(
+                getApplication() as Context,
+                "Failed to save file!",
+                Toast.LENGTH_SHORT
+            )
+                .show()
         }
     }
 }
