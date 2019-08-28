@@ -19,5 +19,4 @@ class ActivityMainHost : AppCompatActivity() {
         Timber.plant(Timber.DebugTree())
         Timber.i("Timber has been planted.")
     }
-
 }

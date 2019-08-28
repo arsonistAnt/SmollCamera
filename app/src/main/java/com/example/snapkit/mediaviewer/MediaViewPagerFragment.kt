@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -21,6 +22,7 @@ class MediaViewPagerFragment : Fragment() {
     private lateinit var binding: FragmentMediaViewPagerBinding
     private lateinit var sharedGallery: SharedGalleryViewModel
     private lateinit var mediaViewPager: MediaViewPager
+    private var sysWindowsVisible = true
     private val safeFragmentArgs: MediaViewPagerFragmentArgs by navArgs()
     private val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
@@ -29,6 +31,7 @@ class MediaViewPagerFragment : Fragment() {
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
         initMediaPager()
         initObserversShared()
+        setupSysWindows()
         return binding.root
     }
 
@@ -63,8 +66,52 @@ class MediaViewPagerFragment : Fragment() {
             val mediaViewPagerAdapter = MediaViewPagerAdapter(imageList, childFragmentManager)
             mediaViewPager.adapter = mediaViewPagerAdapter
             mediaViewPager.currentItem = safeFragmentArgs.clickPosition
+            mediaViewPager.onSingleTap {
+                toggleSystemUI()
+            }
         })
     }
 
+    /**
+     * Set visibility mode for the system windows.
+     */
+    private fun setupSysWindows() {
+        val activityWindow = requireActivity().window
+        activityWindow.decorView.systemUiVisibility
+    }
 
+    /**
+     * Hide status bar and navigation bar.
+     */
+    private fun hideSysWindows(activity: Window) {
+        activity.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_IMMERSIVE)
+    }
+
+    /**
+     * Show status bar and navigation bar.
+     */
+    private fun showSysWindows(activity: Window) {
+        activity.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    }
+
+    /**
+     * Allow toggling of navigation and status bars with a single tap.
+     */
+    private fun toggleSystemUI() {
+        val activityWindow = requireActivity().window
+        sysWindowsVisible = if (sysWindowsVisible) {
+            hideSysWindows(activityWindow)
+            false
+        } else {
+            showSysWindows(activityWindow)
+            true
+        }
+    }
 }
