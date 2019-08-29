@@ -31,7 +31,6 @@ class MediaViewPagerFragment : Fragment() {
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
         initMediaPager()
         initObserversShared()
-        setupSysWindows()
         return binding.root
     }
 
@@ -70,14 +69,6 @@ class MediaViewPagerFragment : Fragment() {
                 toggleSystemUI()
             }
         })
-    }
-
-    /**
-     * Set visibility mode for the system windows.
-     */
-    private fun setupSysWindows() {
-        val activityWindow = requireActivity().window
-        activityWindow.decorView.systemUiVisibility
     }
 
     /**
