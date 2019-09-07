@@ -67,7 +67,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:2.1.0-alpha06"
 
     // PhotoView Component
-    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     // Dexter Permissions library
     implementation 'com.karumi:dexter:5.0.0'

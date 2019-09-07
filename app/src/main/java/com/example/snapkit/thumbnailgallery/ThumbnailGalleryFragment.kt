@@ -1,11 +1,12 @@
 package com.example.snapkit.thumbnailgallery
 
 import android.Manifest
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -30,20 +31,16 @@ class ThumbnailGalleryFragment : Fragment() {
         binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
         initViewModel()
         initRecyclerView()
+        setupSystemWindows()
         binding.button.setOnClickListener {
             sharedGallery.updateImageFiles()
         }
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Set the color of the background to white.
-        view.setBackgroundColor(Color.WHITE)
-        super.onViewCreated(view, savedInstanceState)
-    }
-
     override fun onStart() {
         super.onStart()
+        ViewCompat.requestApplyInsets(binding.galleryLayout)
         // Make sure user has given access to storage permissions before updating the thumbnail gallery.
         checkPermissionForStorage()
     }
@@ -107,5 +104,20 @@ class ThumbnailGalleryFragment : Fragment() {
         sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { thumbnailFiles ->
             thumbnailGalleryAdapter.submitList(thumbnailFiles)
         })
+    }
+
+    /**
+     * Setup the system windows.
+     */
+    private fun setupSystemWindows() {
+        val topPadding = binding.galleryLayout.paddingTop
+        val botPadding = binding.galleryLayout.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.galleryLayout) { view, windowInsets ->
+            view.updatePadding(
+                top = windowInsets.systemWindowInsetTop + topPadding,
+                bottom = windowInsets.systemWindowInsetBottom + botPadding
+            )
+            windowInsets
+        }
     }
 }

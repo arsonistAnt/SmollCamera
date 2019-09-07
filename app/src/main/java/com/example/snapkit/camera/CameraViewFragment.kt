@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -43,7 +45,8 @@ class CameraViewFragment : Fragment() {
         if (hasPermissions(requireContext(), *permissions)) {
             initCameraView()
         }
-
+        //Set system ui
+        setupSystemWindows()
         // Observe the values from the viewModel.
         initObservers()
         // Set onClickListeners for states/events that doesn't need to be tracked by the View Model.
@@ -53,6 +56,7 @@ class CameraViewFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        ViewCompat.requestApplyInsets(binding.cameraLayout)
         checkPermissionsForCamera()
     }
 
@@ -149,5 +153,15 @@ class CameraViewFragment : Fragment() {
         })
     }
 
-
+    private fun setupSystemWindows() {
+        val topPadding = binding.cameraLayout.paddingTop
+        val botPadding = binding.cameraLayout.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.cameraLayout) { view, windowInsets ->
+            view.updatePadding(
+                top = windowInsets.systemWindowInsetTop + topPadding,
+                bottom = windowInsets.systemWindowInsetBottom + botPadding
+            )
+            windowInsets
+        }
+    }
 }
