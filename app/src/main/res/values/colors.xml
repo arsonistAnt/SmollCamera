@@ -9,5 +9,7 @@
     <color name="primaryTextColor">#FFFFFF</color>
     <color name="statusBarColor">#80000000</color>
     <color name="black">#000000</color>
+    <color name="blackTint">#6F000000</color>
+    <color name="white">#FFFFFF</color>
 
 </resources>

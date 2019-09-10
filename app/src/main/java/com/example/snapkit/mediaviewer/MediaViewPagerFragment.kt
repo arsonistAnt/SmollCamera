@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -29,6 +30,7 @@ class MediaViewPagerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMediaViewPagerBinding.inflate(inflater)
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
+        initBottomNavBar()
         initMediaPager()
         initObserversShared()
         return binding.root
@@ -36,6 +38,7 @@ class MediaViewPagerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        ViewCompat.requestApplyInsets(binding.mediaMenuLayout)
         if (!hasPermissions(requireContext(), *permissions)) {
             val mediaDialog = getAlertDialog(requireContext())
             mediaDialog.setMessage(getString(R.string.storage_dialog_message))
@@ -99,10 +102,26 @@ class MediaViewPagerFragment : Fragment() {
         val activityWindow = requireActivity().window
         sysWindowsVisible = if (sysWindowsVisible) {
             hideSysWindows(activityWindow)
+            binding.mediaMenuLayout.visibility = View.GONE
             false
         } else {
             showSysWindows(activityWindow)
+            binding.mediaMenuLayout.visibility = View.VISIBLE
             true
+        }
+    }
+
+    /**
+     * Set parameters for the bottom navigation bar.
+     */
+    private fun initBottomNavBar() {
+        val menuLayout = binding.mediaMenuLayout
+        val menuMarginParams = menuLayout.layoutParams as ViewGroup.MarginLayoutParams
+        val bottomMargin = menuMarginParams.bottomMargin
+
+        ViewCompat.setOnApplyWindowInsetsListener(menuLayout) { _, insets ->
+            menuMarginParams.bottomMargin = bottomMargin + insets.systemWindowInsetBottom
+            insets
         }
     }
 }
