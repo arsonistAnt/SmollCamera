@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -31,6 +32,7 @@ class MediaViewPagerFragment : Fragment() {
         binding = FragmentMediaViewPagerBinding.inflate(inflater)
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
         initBottomNavBar()
+        initMenuClickListeners()
         initMediaPager()
         initObserversShared()
         return binding.root
@@ -122,6 +124,15 @@ class MediaViewPagerFragment : Fragment() {
         ViewCompat.setOnApplyWindowInsetsListener(menuLayout) { _, insets ->
             menuMarginParams.bottomMargin = bottomMargin + insets.systemWindowInsetBottom
             insets
+        }
+    }
+
+    /**
+     * Create on click listeners for the buttons in the bottom menu layout.
+     */
+    private fun initMenuClickListeners() {
+        binding.shareImageButton.setOnClickListener {
+            Toast.makeText(requireContext(), "Clicked!", Toast.LENGTH_SHORT).show()
         }
     }
 }
