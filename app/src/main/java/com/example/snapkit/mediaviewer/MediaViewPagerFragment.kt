@@ -1,21 +1,24 @@
 package com.example.snapkit.mediaviewer
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
 import com.example.snapkit.utils.*
+import java.io.File
 
 // Store the page margin value (in dp)
 private const val PAGE_MARGIN = 24
@@ -24,6 +27,7 @@ class MediaViewPagerFragment : Fragment() {
     private lateinit var binding: FragmentMediaViewPagerBinding
     private lateinit var sharedGallery: SharedGalleryViewModel
     private lateinit var mediaViewPager: MediaViewPager
+    private lateinit var mediaViewModel: MediaViewModel
     private var sysWindowsVisible = true
     private val safeFragmentArgs: MediaViewPagerFragmentArgs by navArgs()
     private val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -31,8 +35,9 @@ class MediaViewPagerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMediaViewPagerBinding.inflate(inflater)
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
+        mediaViewModel = ViewModelProviders.of(requireActivity()).get(MediaViewModel::class.java)
+        binding.viewModel = mediaViewModel
         initBottomNavBar()
-        initMenuClickListeners()
         initMediaPager()
         initObserversShared()
         return binding.root
@@ -74,6 +79,40 @@ class MediaViewPagerFragment : Fragment() {
                 toggleSystemUI()
             }
         })
+
+        mediaViewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { shouldNavigate ->
+            if (shouldNavigate) {
+                val navController = findNavController()
+                val actionToGallery =
+                    MediaViewPagerFragmentDirections.actionMediaViewPagerFragmentToImageGalleryFragment()
+                navController.navigate(actionToGallery)
+                mediaViewModel.navigateToGalleryDone()
+            }
+        })
+
+        mediaViewModel.sharePhoto.observe(viewLifecycleOwner, Observer { startShareIntent ->
+            if (startShareIntent) {
+                shareImageIntent()
+                mediaViewModel.sharePhotoDone()
+            }
+        })
+    }
+
+    /**
+     * Start an ACTION_SEND intent to share an image.
+     */
+    private fun shareImageIntent() {
+        val adapter = mediaViewPager.adapter as MediaViewPagerAdapter
+        val filePathString = adapter.getImageFile(mediaViewPager.currentItem).filePath
+        val imageUri =
+            FileProvider.getUriForFile(requireContext(), "com.example.snapkit.fileprovider", File(filePathString))
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, imageUri)
+            type = "image/*"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        startActivity(Intent.createChooser(shareIntent, "Share Image to..."))
     }
 
     /**
@@ -124,15 +163,6 @@ class MediaViewPagerFragment : Fragment() {
         ViewCompat.setOnApplyWindowInsetsListener(menuLayout) { _, insets ->
             menuMarginParams.bottomMargin = bottomMargin + insets.systemWindowInsetBottom
             insets
-        }
-    }
-
-    /**
-     * Create on click listeners for the buttons in the bottom menu layout.
-     */
-    private fun initMenuClickListeners() {
-        binding.shareImageButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Clicked!", Toast.LENGTH_SHORT).show()
         }
     }
 }

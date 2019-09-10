@@ -10,4 +10,5 @@
         \n\nPlease go to your settings and allow storage permissions.
     </string>
     <string name="refresh_temp_delete_later">Refresh</string>
+    <string name="file_authority">com.example.snapkit.fileprovider</string>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File paths for the FileProvider authority. -->
+<paths>
+    <external-path name="dcim_assets" path="/"/>
+</paths>

@@ -76,9 +76,9 @@ class ThumbnailGalleryFragment : Fragment() {
             // Navigate to the ImageViewer when any of the image thumbnail is clicked.
             val navController = findNavController()
             // Pass the filePath args to the ImageViewerFragment using safe args.
-            val actionToMediaViewPager =
-                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(clickPosition)
-            navController.navigate(actionToMediaViewPager)
+//            val actionToMediaViewPager =
+//                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(clickPosition)
+//            navController.navigate(actionToMediaViewPager)
         })
         // Recycler view needs a layout manager and a user defined Adapter class that extends RecyclerAdapter.
         binding.galleryRecyclerView.apply {
