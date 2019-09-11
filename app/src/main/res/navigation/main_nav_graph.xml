@@ -4,7 +4,10 @@
             android:id="@+id/main_nav_graph" app:startDestination="@id/cameraViewFragment2">
     <fragment android:id="@+id/imageGalleryFragment"
               android:name="com.example.snapkit.thumbnailgallery.ThumbnailGalleryFragment"
-              android:label="ImageGalleryFragment"/>
+              android:label="ImageGalleryFragment">
+        <action android:id="@+id/action_imageGalleryFragment_to_mediaViewPagerFragment"
+                app:destination="@+id/mediaViewPagerFragment" app:popUpTo="@+id/cameraViewFragment2"/>
+    </fragment>
     <fragment android:id="@+id/cameraViewFragment2" android:name="com.example.snapkit.camera.CameraViewFragment"
               android:label="CameraViewFragment">
         <action android:id="@+id/action_cameraViewFragment2_to_mediaViewPagerFragment"
