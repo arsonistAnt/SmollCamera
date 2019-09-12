@@ -4,11 +4,11 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import com.example.snapkit.domain.ImageFile
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
+import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
@@ -74,7 +74,7 @@ fun scanForMediaFiles(
             }
         }
     } catch (e: Exception) {
-        Log.e(CLASS_TAG, e.message)
+        Timber.e(e)
     }
 
 }

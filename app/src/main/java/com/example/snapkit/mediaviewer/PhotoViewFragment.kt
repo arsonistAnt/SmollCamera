@@ -30,7 +30,7 @@ class PhotoViewFragment : Fragment() {
     private fun setupPhotoView() {
         val photoView = photoViewBinding.photoView
         // Disable paging if PhotoView is zoomed in using a listener.
-        photoView.setOnScaleChangeListener { scaleFactor, focusX, focusY ->
+        photoView.setOnScaleChangeListener { _, _, _ ->
             // Calculate if the value is close to the expected value.
             val isValueApproximate = { expectedValue: Float, value: Float ->
                 // The max amount of error that is allowed.

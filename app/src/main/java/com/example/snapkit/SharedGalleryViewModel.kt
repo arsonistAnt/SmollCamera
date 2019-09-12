@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+import com.example.snapkit.database.FavoritedImage
 import com.example.snapkit.database.MediaFileDatabase
 import com.example.snapkit.database.getDatabase
 import com.example.snapkit.domain.ImageFile
@@ -21,6 +22,10 @@ import kotlinx.coroutines.launch
 class SharedGalleryViewModel(application: Application) : AndroidViewModel(application) {
     // Store cached media file info into a live data.
     var mediaFiles: LiveData<List<ImageFile>>
+
+    // Store list of favorited images.
+    var favoritedImages: LiveData<List<String>>
+
     // Co-routine variables.
     private var viewModelJob = Job()
     private var viewModelScope = CoroutineScope(viewModelJob)
@@ -31,6 +36,10 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
         mediaFiles = Transformations.map(mediaDB.mediaFileDao().getMediaFiles()) { mediaFiles ->
             mediaFiles.toImageFiles()
+        }
+
+        favoritedImages = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->
+            favorites.map { it.uri }
         }
     }
 
@@ -49,14 +58,28 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
                 mediaDB.mediaFileDao().getMediaFilesAsync()
             }
             // Remove any stale records from the database.
-            if (cachedFiles.await().size != mediaStoreFiles.await().size) {
-                val updatedFiles = mediaStoreFiles.await()
-                val staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
+            val updatedFiles = mediaStoreFiles.await()
+            val staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
+            mediaDB.mediaFileDao().delete(staleFiles)
 
-                mediaDB.mediaFileDao().delete(staleFiles)
-            }
             // Upsert the newly fetched files to the database.
             mediaDB.mediaFileDao().insertAll(mediaStoreFiles.await())
         }
     }
+
+    /**
+     * Add an image to the favorited_images table.
+     */
+    fun addToFavoritesDB(favoriteImage: FavoritedImage) {
+        viewModelScope.launch {
+            mediaDB.favoritedImagesDao().insertFileUri(favoriteImage)
+        }
+    }
+
+    fun removeFromFavoritesDB(favoriteImage: FavoritedImage) {
+        viewModelScope.launch {
+            mediaDB.favoritedImagesDao().delete(favoriteImage)
+        }
+    }
+
 }

@@ -9,7 +9,13 @@ import com.example.snapkit.domain.ImageFile
  */
 fun List<MediaFile>.toImageFiles(): List<ImageFile> {
     return map {
-        ImageFile(it.uri, it.creationDate, it.creationTime, it.dateTakenLong)
+        ImageFile(
+            it.uri,
+            it.creationDate,
+            it.creationTime,
+            it.dateTakenLong,
+            it.hearted
+        )
     }
 }
 
@@ -18,7 +24,13 @@ fun List<MediaFile>.toImageFiles(): List<ImageFile> {
  */
 fun List<ImageFile>.toMediaFiles(): List<MediaFile> {
     return map {
-        MediaFile(it.filePath, it.dateCreated, it.timeCreated, it.dateTakenLong)
+        MediaFile(
+            it.filePath,
+            it.dateCreated,
+            it.timeCreated,
+            it.dateTakenLong,
+            it.hearted
+        )
     }
 }
 

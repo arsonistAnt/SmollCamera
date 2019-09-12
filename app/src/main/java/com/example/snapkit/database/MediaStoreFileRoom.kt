@@ -10,9 +10,9 @@ data class MediaFile(
     val uri: String,
     val creationDate: String,
     val creationTime: String,
-    val dateTakenLong: Long
+    val dateTakenLong: Long,
+    val hearted: Boolean = false
 )
-
 @Dao
 interface MediaFileDao {
     @Insert
@@ -30,11 +30,36 @@ interface MediaFileDao {
     @Delete
     suspend fun delete(mediaFile: List<MediaFile>)
 
+    @Update
+    suspend fun updateMediaFiles(vararg mediaFiles: MediaFile)
+
 }
 
-@Database(entities = [MediaFile::class], version = 2)
+@Entity(tableName = "favorite_images")
+data class FavoritedImage(
+    @PrimaryKey
+    val uri: String
+)
+
+@Dao
+interface FavoritedImageDao {
+    @Insert
+    suspend fun insertFileUri(favoriteImage: FavoritedImage)
+
+    @Delete
+    suspend fun delete(favoriteImage: FavoritedImage)
+
+    @Query("SELECT * FROM favorite_images")
+    fun getFavorites(): LiveData<List<FavoritedImage>>
+
+    @Query("SELECT * FROM favorite_images")
+    fun getFavoritesAsync(): LiveData<List<FavoritedImage>>
+}
+
+@Database(entities = [MediaFile::class, FavoritedImage::class], version = 4)
 abstract class MediaFileDatabase : RoomDatabase() {
     abstract fun mediaFileDao(): MediaFileDao
+    abstract fun favoritedImagesDao(): FavoritedImageDao
 }
 
 private lateinit var INSTANCE: MediaFileDatabase

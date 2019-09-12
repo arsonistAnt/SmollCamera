@@ -14,9 +14,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.viewpager.widget.ViewPager
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
+import com.example.snapkit.database.FavoritedImage
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
+import com.example.snapkit.domain.ImageFile
 import com.example.snapkit.utils.*
 import java.io.File
 
@@ -64,7 +67,32 @@ class MediaViewPagerFragment : Fragment() {
         mediaViewPager.pageMargin = PAGE_MARGIN.dp.toPx()
         // Set position of the pager to the one that the user clicked in the ThumbnailGalleryFragment.
         mediaViewPager.currentItem = safeFragmentArgs.clickPosition
+        mediaViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {}
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+            override fun onPageSelected(position: Int) {
+                handleHeartIcon(position)
+            }
+        })
     }
+
+    /**
+     * Handles how the Heart icon should be shown.
+     *
+     * @param position the position of the image file that will help conclude how the Heart icon should be shown
+     */
+    private fun handleHeartIcon(position: Int) {
+        val currentImageFile = getImageFileFromAdapter(position)
+        currentImageFile?.apply {
+            val favoritesList = sharedGallery.favoritedImages.value
+            val hearted = favoritesList?.contains(filePath)
+            hearted?.apply {
+                toggleHeartImageButton(hearted)
+            }
+        }
+    }
+
 
     /**
      * Subscribe observer to the shared ViewModel data.
@@ -78,6 +106,10 @@ class MediaViewPagerFragment : Fragment() {
             mediaViewPager.onSingleTap {
                 toggleSystemUI()
             }
+        })
+
+        sharedGallery.favoritedImages.observe(viewLifecycleOwner, Observer { favoriteList ->
+            handleHeartIcon(mediaViewPager.currentItem)
         })
 
         mediaViewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { shouldNavigate ->
@@ -96,14 +128,48 @@ class MediaViewPagerFragment : Fragment() {
                 mediaViewModel.sharePhotoDone()
             }
         })
+
+        mediaViewModel.hearted.observe(viewLifecycleOwner, Observer { heartButtonClicked ->
+            if (heartButtonClicked) {
+                val imageFile = getImageFileFromAdapter(mediaViewPager.currentItem)
+                imageFile?.apply {
+                    // By default ImageFile has its hearted member property to false initially, so inverting it will be fine.
+                    val favoritedImagePath = FavoritedImage(filePath)
+                    val favoritesList = sharedGallery.favoritedImages.value
+                    val inFavorites = favoritesList?.contains(filePath)
+                    inFavorites?.apply {
+                        if (!inFavorites) {
+                            sharedGallery.addToFavoritesDB(favoritedImagePath)
+                            // If it hasn't been favorited then toggle the heart button.
+                            toggleHeartImageButton(true)
+                        } else {
+                            sharedGallery.removeFromFavoritesDB(favoritedImagePath)
+                            toggleHeartImageButton(false)
+                        }
+                    }
+                }
+                mediaViewModel.heartButtonClickedDone()
+            }
+        })
+    }
+
+    /**
+     * Toggle heart button drawable.
+     *
+     * @param hearted a boolean that determines which heart drawable should be shown.
+     */
+    private fun toggleHeartImageButton(hearted: Boolean) {
+        if (hearted)
+            binding.heartImageButton.setImageResource(R.drawable.ic_heart_filled_icon_temp)
+        else
+            binding.heartImageButton.setImageResource(R.drawable.ic_heart_border_icon_temp)
     }
 
     /**
      * Start an ACTION_SEND intent to share an image.
      */
     private fun shareImageIntent() {
-        val adapter = mediaViewPager.adapter as MediaViewPagerAdapter
-        val filePathString = adapter.getImageFile(mediaViewPager.currentItem).filePath
+        val filePathString = getImageFileFromAdapter(mediaViewPager.currentItem)?.filePath
         val imageUri =
             FileProvider.getUriForFile(requireContext(), "com.example.snapkit.fileprovider", File(filePathString))
         val shareIntent = Intent().apply {
@@ -164,5 +230,16 @@ class MediaViewPagerFragment : Fragment() {
             menuMarginParams.bottomMargin = bottomMargin + insets.systemWindowInsetBottom
             insets
         }
+    }
+
+    /**
+     * Return an ImageFile from a given position for the MediaViewPager's adapter.
+     *
+     * @param position the position of the ImageFile list to obtain.
+     * @return an ImageFile object.
+     */
+    private fun getImageFileFromAdapter(position: Int): ImageFile? {
+        val adapter = mediaViewPager.adapter as MediaViewPagerAdapter?
+        return adapter?.getImageFile(position)
     }
 }

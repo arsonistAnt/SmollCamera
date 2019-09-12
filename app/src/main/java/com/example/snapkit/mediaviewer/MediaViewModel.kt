@@ -15,6 +15,24 @@ class MediaViewModel : ViewModel() {
     val sharePhoto: LiveData<Boolean>
         get() = _sharePhoto
 
+    // If user has clicked on the Heart button, toggle heart image.
+    private val _hearted = MutableLiveData<Boolean>()
+    val hearted: LiveData<Boolean>
+        get() = _hearted
+
+    /**
+     * Set _hearted to true if user has clicked on heart button.
+     */
+    fun heartButtonClicked() {
+        _hearted.value = true
+    }
+
+    /**
+     * Set _hearted to false once handling of the toggle is done.
+     */
+    fun heartButtonClickedDone() {
+        _hearted.value = false
+    }
 
     /**
      * Set _navigateToGallery to true if user has clicked on image button.
