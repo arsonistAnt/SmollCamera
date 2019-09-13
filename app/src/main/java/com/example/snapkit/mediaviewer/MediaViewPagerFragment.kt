@@ -134,17 +134,16 @@ class MediaViewPagerFragment : Fragment() {
                 val imageFile = getImageFileFromAdapter(mediaViewPager.currentItem)
                 imageFile?.apply {
                     // By default ImageFile has its hearted member property to false initially, so inverting it will be fine.
-                    val favoritedImagePath = FavoritedImage(filePath)
+                    val favoriteImagePath = FavoritedImage(filePath)
                     val favoritesList = sharedGallery.favoritedImages.value
                     val inFavorites = favoritesList?.contains(filePath)
                     inFavorites?.apply {
                         if (!inFavorites) {
-                            sharedGallery.addToFavoritesDB(favoritedImagePath)
-                            // If it hasn't been favorited then toggle the heart button.
-                            toggleHeartImageButton(true)
+                            // Will trigger the favoriteImages Observable -> calling toggleHeartImageButton()
+                            sharedGallery.addToFavoritesDB(favoriteImagePath)
                         } else {
-                            sharedGallery.removeFromFavoritesDB(favoritedImagePath)
-                            toggleHeartImageButton(false)
+                            // Will trigger the favoriteImages Observable -> calling toggleHeartImageButton()
+                            sharedGallery.removeFromFavoritesDB(favoriteImagePath)
                         }
                     }
                 }
