@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.snapkit.R
 import com.example.snapkit.databinding.FragmentCameraViewBinding
 import com.example.snapkit.utils.PermissionUtilsCallbacks
-import com.example.snapkit.utils.getAlertDialog
+import com.example.snapkit.utils.getPermissionAlertDialog
 import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
 import com.otaliastudios.cameraview.CameraListener
@@ -68,7 +68,7 @@ class CameraViewFragment : Fragment() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             val permsGranted = hasPermissions(requireContext(), *permissions)
             if (!permsGranted) {
-                val cameraAlertDialog = getAlertDialog(requireContext())
+                val cameraAlertDialog = getPermissionAlertDialog(requireContext())
                 cameraAlertDialog.setMessage(getString(R.string.camera_dialog_message))
                 cameraAlertDialog.setTitle(R.string.permissions_dialog_title)
                 val permCallBacks = object : PermissionUtilsCallbacks() {

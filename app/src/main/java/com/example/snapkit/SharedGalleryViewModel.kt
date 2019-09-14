@@ -1,13 +1,16 @@
 package com.example.snapkit
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.example.snapkit.database.FavoritedImage
+import com.example.snapkit.database.MediaFile
 import com.example.snapkit.database.MediaFileDatabase
 import com.example.snapkit.database.getDatabase
 import com.example.snapkit.domain.ImageFile
+import com.example.snapkit.utils.deleteFileFromMediaStore
 import com.example.snapkit.utils.getImagesFromMediaStore
 import com.example.snapkit.utils.toImageFiles
 import com.example.snapkit.utils.toMediaFiles
@@ -23,8 +26,8 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     // Store cached media file info into a live data.
     var mediaFiles: LiveData<List<ImageFile>>
 
-    // Store list of favorited images.
-    var favoritedImages: LiveData<List<String>>
+    // Store list of favorite images.
+    var favoriteImages: LiveData<List<String>>
 
     // Co-routine variables.
     private var viewModelJob = Job()
@@ -37,8 +40,8 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
         mediaFiles = Transformations.map(mediaDB.mediaFileDao().getMediaFiles()) { mediaFiles ->
             mediaFiles.toImageFiles()
         }
-
-        favoritedImages = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->
+        // Modify the return value so that we get string uri paths instead.
+        favoriteImages = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->
             favorites.map { it.uri }
         }
     }
@@ -68,7 +71,26 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     }
 
     /**
+     * Remove image an file from the application.
+     *
+     * @param imageFile an ImageFile object that will be used for deletion.
+     */
+    fun removeImageFile(imageFile: ImageFile) {
+        val context = getApplication() as Context
+        viewModelScope.launch {
+            // Remove the file from the media store.
+            deleteFileFromMediaStore(context, imageFile.filePath)
+            // Remove the file from the cache
+            val deletedMediaFile =
+                MediaFile(imageFile.filePath, imageFile.dateCreated, imageFile.timeCreated, imageFile.dateTakenLong)
+            mediaDB.mediaFileDao().delete(arrayListOf(deletedMediaFile))
+        }
+    }
+
+    /**
      * Add an image to the favorited_images table.
+     *
+     * @param favoriteImage a database entity object that will be added to the favorite_images table.
      */
     fun addToFavoritesDB(favoriteImage: FavoritedImage) {
         viewModelScope.launch {
@@ -76,10 +98,14 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    /**
+     * Remove an image from the favorited_images table.
+     *
+     * @param favoriteImage a database entity object that will be removed from the favorite_images table.
+     */
     fun removeFromFavoritesDB(favoriteImage: FavoritedImage) {
         viewModelScope.launch {
             mediaDB.favoritedImagesDao().delete(favoriteImage)
         }
     }
-
 }

@@ -27,7 +27,7 @@
                     android:layout_height="wrap_content" android:layout_weight="1" android:layout_gravity="center">
                 <ImageView
                         android:layout_width="match_parent"
-                        android:onClick="@{() -> viewModel.sharePhoto()}"
+                        android:onClick="@{() -> viewModel.shareButtonClicked()}"
                         android:layout_height="wrap_content" app:srcCompat="@drawable/ic_share_icon_temp"
                         android:id="@+id/share_image_button" tools:ignore="ContentDescription"/>
             </LinearLayout>
@@ -57,6 +57,7 @@
                     android:layout_height="wrap_content" android:layout_weight="1">
                 <ImageView
                         android:layout_width="match_parent"
+                        android:onClick="@{() -> viewModel.trashButtonClicked()}"
                         android:layout_height="wrap_content" app:srcCompat="@drawable/ic_trash_temp"
                         android:id="@+id/trash_image_button" tools:ignore="ContentDescription"/>
             </LinearLayout>

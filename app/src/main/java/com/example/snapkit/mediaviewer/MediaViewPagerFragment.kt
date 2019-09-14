@@ -50,7 +50,7 @@ class MediaViewPagerFragment : Fragment() {
         super.onStart()
         ViewCompat.requestApplyInsets(binding.mediaMenuLayout)
         if (!hasPermissions(requireContext(), *permissions)) {
-            val mediaDialog = getAlertDialog(requireContext())
+            val mediaDialog = getPermissionAlertDialog(requireContext())
             mediaDialog.setMessage(getString(R.string.storage_dialog_message))
             mediaDialog.setTitle(R.string.permissions_dialog_title)
             requestForPermissions(requireActivity(), mediaDialog, *permissions)
@@ -85,7 +85,7 @@ class MediaViewPagerFragment : Fragment() {
     private fun handleHeartIcon(position: Int) {
         val currentImageFile = getImageFileFromAdapter(position)
         currentImageFile?.apply {
-            val favoritesList = sharedGallery.favoritedImages.value
+            val favoritesList = sharedGallery.favoriteImages.value
             val hearted = favoritesList?.contains(filePath)
             hearted?.apply {
                 toggleHeartImageButton(hearted)
@@ -108,7 +108,7 @@ class MediaViewPagerFragment : Fragment() {
             }
         })
 
-        sharedGallery.favoritedImages.observe(viewLifecycleOwner, Observer { favoriteList ->
+        sharedGallery.favoriteImages.observe(viewLifecycleOwner, Observer { _ ->
             handleHeartIcon(mediaViewPager.currentItem)
         })
 
@@ -125,17 +125,17 @@ class MediaViewPagerFragment : Fragment() {
         mediaViewModel.sharePhoto.observe(viewLifecycleOwner, Observer { startShareIntent ->
             if (startShareIntent) {
                 shareImageIntent()
-                mediaViewModel.sharePhotoDone()
+                mediaViewModel.shareButtonClickedDone()
             }
         })
 
-        mediaViewModel.hearted.observe(viewLifecycleOwner, Observer { heartButtonClicked ->
+        mediaViewModel.heartButtonPressed.observe(viewLifecycleOwner, Observer { heartButtonClicked ->
             if (heartButtonClicked) {
                 val imageFile = getImageFileFromAdapter(mediaViewPager.currentItem)
                 imageFile?.apply {
-                    // By default ImageFile has its hearted member property to false initially, so inverting it will be fine.
+                    // By default ImageFile has its heartButtonPressed member property to false initially, so inverting it will be fine.
                     val favoriteImagePath = FavoritedImage(filePath)
-                    val favoritesList = sharedGallery.favoritedImages.value
+                    val favoritesList = sharedGallery.favoriteImages.value
                     val inFavorites = favoritesList?.contains(filePath)
                     inFavorites?.apply {
                         if (!inFavorites) {
@@ -148,6 +148,16 @@ class MediaViewPagerFragment : Fragment() {
                     }
                 }
                 mediaViewModel.heartButtonClickedDone()
+            }
+        })
+
+        mediaViewModel.trashButtonPressed.observe(viewLifecycleOwner, Observer { trashButtonClicked ->
+            if (trashButtonClicked) {
+                val currentImage = getImageFileFromAdapter(mediaViewPager.currentItem)
+                currentImage?.apply {
+                    sharedGallery.removeImageFile(currentImage)
+                }
+                mediaViewModel.trashButtonClickedDone()
             }
         })
     }
@@ -224,7 +234,6 @@ class MediaViewPagerFragment : Fragment() {
         val menuLayout = binding.mediaMenuLayout
         val menuMarginParams = menuLayout.layoutParams as ViewGroup.MarginLayoutParams
         val bottomMargin = menuMarginParams.bottomMargin
-
         ViewCompat.setOnApplyWindowInsetsListener(menuLayout) { _, insets ->
             menuMarginParams.bottomMargin = bottomMargin + insets.systemWindowInsetBottom
             insets

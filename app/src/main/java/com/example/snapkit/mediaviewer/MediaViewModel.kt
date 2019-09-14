@@ -16,22 +16,27 @@ class MediaViewModel : ViewModel() {
         get() = _sharePhoto
 
     // If user has clicked on the Heart button, toggle heart image.
-    private val _hearted = MutableLiveData<Boolean>()
-    val hearted: LiveData<Boolean>
-        get() = _hearted
+    private val _heartButtonPressed = MutableLiveData<Boolean>()
+    val heartButtonPressed: LiveData<Boolean>
+        get() = _heartButtonPressed
+
+    // If user has clicked on the Heart button, toggle heart image.
+    private val _trashButtonPressed = MutableLiveData<Boolean>()
+    val trashButtonPressed: LiveData<Boolean>
+        get() = _trashButtonPressed
 
     /**
-     * Set _hearted to true if user has clicked on heart button.
+     * Set _heartButtonPressed to true if user has clicked on heart button.
      */
     fun heartButtonClicked() {
-        _hearted.value = true
+        _heartButtonPressed.value = true
     }
 
     /**
-     * Set _hearted to false once handling of the toggle is done.
+     * Set _heartButtonPressed to false once handling of the toggle is done.
      */
     fun heartButtonClickedDone() {
-        _hearted.value = false
+        _heartButtonPressed.value = false
     }
 
     /**
@@ -51,14 +56,28 @@ class MediaViewModel : ViewModel() {
     /**
      * Set _sharePhoto to true if user has clicked on the share button.
      */
-    fun sharePhoto() {
+    fun shareButtonClicked() {
         _sharePhoto.value = true
     }
 
     /**
      * Set _sharePhoto to false once sharing intent is finished.
      */
-    fun sharePhotoDone() {
+    fun shareButtonClickedDone() {
         _sharePhoto.value = false
+    }
+
+    /**
+     * Set _sharePhoto to true if user has clicked on the share button.
+     */
+    fun trashButtonClicked() {
+        _trashButtonPressed.value = true
+    }
+
+    /**
+     * Set _sharePhoto to false once sharing intent is finished.
+     */
+    fun trashButtonClickedDone() {
+        _trashButtonPressed.value = false
     }
 }

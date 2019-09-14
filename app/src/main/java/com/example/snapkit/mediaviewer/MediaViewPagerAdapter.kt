@@ -29,14 +29,13 @@ class MediaViewPagerAdapter(private val imageList: List<ImageFile>, fm: Fragment
     }
 
     /**
-     * Return an ImageFile object at the position of the list.
+     * Return an ImageFile object at the position of the list, if no image files exist return null.
      *
      * @return an ImageFile object
      */
-    fun getImageFile(position: Int): ImageFile = imageList[position]
-
+    fun getImageFile(position: Int): ImageFile? {
+        return if (imageList.isNotEmpty()) {
+            imageList[position]
+        } else null
+    }
 }
-
-
-
-

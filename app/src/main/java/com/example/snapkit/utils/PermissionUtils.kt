@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.example.snapkit.R
 import com.karumi.dexter.Dexter
@@ -15,6 +14,7 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import timber.log.Timber
 
 
 /**
@@ -23,7 +23,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
  * @param context the context
  * @return the AlertDialog object.
  */
-fun getAlertDialog(context: Context): AlertDialog = AlertDialog.Builder(context)
+fun getPermissionAlertDialog(context: Context): AlertDialog = AlertDialog.Builder(context)
     .setCancelable(false) // Prevent back button from dismissing the dialog.
     .setPositiveButton(R.string.permissions_dialog_positive_button) { _, _ ->
         openSettings(context as Activity)
@@ -84,7 +84,7 @@ fun requestForPermissions(activity: Activity, permDeniedDialog: AlertDialog, var
                 token?.continuePermissionRequest()
             }
         })
-        .withErrorListener { error -> Log.e("Dexter", "There was an error: $error") }
+        .withErrorListener { error -> Timber.e("There was an error: $error") }
         .check()
 }
 
@@ -109,7 +109,6 @@ fun requestForPermissions(activity: Activity, permCallBack: PermissionUtilsCallb
                     }
                 }
             }
-
             override fun onPermissionRationaleShouldBeShown(
                 permissions: MutableList<PermissionRequest>?,
                 token: PermissionToken?
@@ -117,7 +116,7 @@ fun requestForPermissions(activity: Activity, permCallBack: PermissionUtilsCallb
                 token?.continuePermissionRequest()
             }
         })
-        .withErrorListener { error -> Log.e("Dexter", "There was an error: $error") }
+        .withErrorListener { error -> Timber.e("There was an error: $error") }
         .check()
 }
 

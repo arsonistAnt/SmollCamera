@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
 import android.provider.MediaStore
+import android.widget.Toast
 import com.example.snapkit.domain.ImageFile
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -74,9 +75,9 @@ fun scanForMediaFiles(
             }
         }
     } catch (e: Exception) {
+        Toast.makeText(context, "Failed to scan for the file!", Toast.LENGTH_LONG).show()
         Timber.e(e)
     }
-
 }
 
 /**
@@ -118,12 +119,13 @@ fun getImagesFromMediaStore(context: Context): List<ImageFile> {
 
 
 /**
- * Get
+ * Get an image file from the media store.
  *
  * @param context the context where the function was called.
+ * @param filePath the path the image was stored in.
  * @return an ImageFile object.
  */
-fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
+fun getImageFromMediaStore(context: Context, filePath: String): ImageFile? {
     val dataColumns = arrayOf(
         MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED,
         MediaStore.Images.Media.DATE_TAKEN
@@ -134,7 +136,7 @@ fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
     // Order by
     val orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC"
     val contentResolver = context.contentResolver
-    val mCursor = contentResolver.query(select, dataColumns, "$dataString = ?", arrayOf(fileName), orderBy)
+    val mCursor = contentResolver.query(select, dataColumns, "$dataString = ?", arrayOf(filePath), orderBy)
     var imageFile: ImageFile? = null
 
     mCursor?.let {
@@ -155,3 +157,24 @@ fun getImageFromMediaStore(context: Context, fileName: String): ImageFile? {
     return imageFile
 }
 
+/**
+ * Remove the image file data from the media store.
+ *
+ * @param context the application context
+ * @param filePath the image location of the file to remove.
+ */
+fun deleteFileFromMediaStore(context: Context, filePath: String) {
+    try {
+        val dcimDir = getDCIMDirectory()
+        dcimDir?.apply {
+            val contentResolver = context.contentResolver
+            val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            contentResolver.delete(uri, MediaStore.Files.FileColumns.DATA + "=?", arrayOf(filePath))
+            // Update media store for good measure.
+            scanForMediaFiles(context, arrayOf(dcimDir.absolutePath)) { _, _ -> }
+        }
+    } catch (e: Exception) {
+        Toast.makeText(context, "Failed to delete image!", Toast.LENGTH_LONG).show()
+        Timber.e(e)
+    }
+}

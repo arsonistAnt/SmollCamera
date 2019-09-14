@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.databinding.FragmentThumbnailGalleryViewBinding
-import com.example.snapkit.utils.getAlertDialog
+import com.example.snapkit.utils.getPermissionAlertDialog
 import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
 
@@ -52,7 +52,7 @@ class ThumbnailGalleryFragment : Fragment() {
         // Permissions need to be requested at runtime if API level >= 23
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (!hasPermissions(requireContext(), permission)) {
-                val thumbnailGalleryDialog = getAlertDialog(requireContext())
+                val thumbnailGalleryDialog = getPermissionAlertDialog(requireContext())
                 thumbnailGalleryDialog.setMessage(getString(R.string.storage_dialog_message))
                 thumbnailGalleryDialog.setTitle(R.string.permissions_dialog_title)
 
