@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
+import com.otaliastudios.cameraview.Flash
 import com.otaliastudios.cameraview.PictureResult
 
 class CameraViewFragment : Fragment() {
@@ -52,6 +54,13 @@ class CameraViewFragment : Fragment() {
         // Set onClickListeners for states/events that doesn't need to be tracked by the View Model.
         setOnClickListeners()
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.flashSettingsButton.setOnClickListener {
+            Toast.makeText(requireContext(), "FLASH FLASH!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onStart() {
@@ -153,8 +162,30 @@ class CameraViewFragment : Fragment() {
                 //TODO: Animation
             }
         })
+
+        // Switch the flash settings mode when flash button is clicked.
+        viewModel.flashSettings.observe(viewLifecycleOwner, Observer { setting ->
+            val resourceID = when (setting) {
+                CameraFlash.OFF -> {
+                    camera.flash = Flash.OFF
+                    R.drawable.ic_no_flash
+                }
+                CameraFlash.AUTO -> {
+                    camera.flash = Flash.AUTO
+                    R.drawable.ic_flash_auto
+                }
+                else -> {
+                    camera.flash = Flash.ON
+                    R.drawable.ic_flash
+                }
+            }
+            binding.flashSettingsButton.setImageResource(resourceID)
+        })
     }
 
+    /**
+     * Setup the system windows.
+     */
     private fun setupSystemWindows() {
         val topPadding = binding.cameraLayout.paddingTop
         val botPadding = binding.cameraLayout.paddingBottom

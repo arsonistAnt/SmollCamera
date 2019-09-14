@@ -13,17 +13,28 @@
             android:id="@+id/camera_layout"
             android:orientation="vertical">
 
-        <com.otaliastudios.cameraview.CameraView
-                android:id="@+id/camera"
-                android:keepScreenOn="true"
-                android:layout_weight="6"
+        <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:cameraGestureTap="focusWithMarker"
-                app:cameraGesturePinch="zoom"
-                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+                android:layout_height="0dp" android:layout_weight="6">
 
-        </com.otaliastudios.cameraview.CameraView>
+            <com.otaliastudios.cameraview.CameraView
+                    android:id="@+id/camera"
+                    android:keepScreenOn="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cameraGestureTap="focusWithMarker"
+                    app:cameraGesturePinch="zoom"
+                    app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+
+            </com.otaliastudios.cameraview.CameraView>
+            <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:srcCompat="@drawable/ic_no_flash"
+                    android:onClick="@{() -> viewModel.onFlashButtonClicked()}"
+                    android:id="@+id/flash_settings_button" android:background="@null"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp" android:layout_marginTop="8dp" tools:ignore="ContentDescription"/>
+        </FrameLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -50,7 +61,8 @@
                     android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
                     android:layout_marginStart="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_marginBottom="16dp" android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toTopOf="parent"/>
             <ImageButton
                     android:layout_width="wrap_content"
                     tools:ignore="ContentDescription"

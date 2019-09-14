@@ -18,7 +18,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+enum class CameraFlash {
+    OFF,
+    ON,
+    AUTO
+}
+
 class CameraViewModel(application: Application) : AndroidViewModel(application) {
+
+    // If the user has clicked on the capture image button.
+    private val _flashSettings = MutableLiveData<CameraFlash>().apply { value = CameraFlash.OFF }
+    val flashSettings: LiveData<CameraFlash>
+        get() = _flashSettings
+
+
     // If the user has clicked on the capture image button.
     private val _captureImage = MutableLiveData<Boolean>()
     val captureImageState: LiveData<Boolean>
@@ -38,6 +51,18 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private val _isCameraInitialized = MutableLiveData<Boolean>()
     val isCameraInitialized: LiveData<Boolean>
         get() = _isCameraInitialized
+
+    /**
+     * Set _flashSettings to the next flash setting state when flash button is clicked.
+     */
+    fun onFlashButtonClicked() {
+        val flashSettingEnums = CameraFlash.values()
+        val currentFlashSettingsPos = _flashSettings.value?.ordinal
+        currentFlashSettingsPos?.apply {
+            val newEnumPosition = (currentFlashSettingsPos + 1) % flashSettingEnums.size
+            _flashSettings.value = flashSettingEnums[newEnumPosition]
+        }
+    }
 
     /**
      * Set _captureImage to true when capture button is clicked.
