@@ -11,5 +11,6 @@
     <color name="black">#000000</color>
     <color name="blackTint">#6F000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="not_quite_black">#23272A</color>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.example.snapkit.mediaviewer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,12 +10,14 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager.widget.ViewPager
+import com.example.snapkit.DeleteAlertDialogFragment
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
 import com.example.snapkit.database.FavoritedImage
@@ -26,7 +29,7 @@ import java.io.File
 // Store the page margin value (in dp)
 private const val PAGE_MARGIN = 24
 
-class MediaViewPagerFragment : Fragment() {
+class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlertDialogListener {
     private lateinit var binding: FragmentMediaViewPagerBinding
     private lateinit var sharedGallery: SharedGalleryViewModel
     private lateinit var mediaViewPager: MediaViewPager
@@ -60,6 +63,28 @@ class MediaViewPagerFragment : Fragment() {
     }
 
     /**
+     * Remove image on positive click from the delete alert dialog.
+     *
+     * @param dialog the DeleteAlertDialogFragment object.
+     */
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        val currentImage = getImageFileFromAdapter(mediaViewPager.currentItem)
+        currentImage?.apply {
+            sharedGallery.removeImageFile(currentImage)
+        }
+        mediaViewModel.trashButtonClickedDone()
+    }
+
+    /**
+     * Remove image on positive click from the delete alert dialog.
+     *
+     * @param dialog the DeleteAlertDialogFragment object.
+     */
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+        mediaViewModel.trashButtonClickedDone()
+    }
+
+    /**
      * Setup basic configurations for the Media Viewpager.
      */
     private fun initMediaPager() {
@@ -70,7 +95,6 @@ class MediaViewPagerFragment : Fragment() {
         mediaViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
-
             override fun onPageSelected(position: Int) {
                 handleHeartIcon(position)
             }
@@ -84,10 +108,10 @@ class MediaViewPagerFragment : Fragment() {
      */
     private fun handleHeartIcon(position: Int) {
         val currentImageFile = getImageFileFromAdapter(position)
-        currentImageFile?.apply {
+        currentImageFile?.let {
             val favoritesList = sharedGallery.favoriteImages.value
-            val hearted = favoritesList?.contains(filePath)
-            hearted?.apply {
+            val hearted = favoritesList?.contains(it.filePath)
+            hearted?.let {
                 toggleHeartImageButton(hearted)
             }
         }
@@ -97,6 +121,7 @@ class MediaViewPagerFragment : Fragment() {
     /**
      * Subscribe observer to the shared ViewModel data.
      */
+    @SuppressLint("InflateParams")
     private fun initObserversShared() {
         sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { imageList ->
             val mediaViewPager = binding.mediaViewer
@@ -132,12 +157,12 @@ class MediaViewPagerFragment : Fragment() {
         mediaViewModel.heartButtonPressed.observe(viewLifecycleOwner, Observer { heartButtonClicked ->
             if (heartButtonClicked) {
                 val imageFile = getImageFileFromAdapter(mediaViewPager.currentItem)
-                imageFile?.apply {
+                imageFile?.let {
                     // By default ImageFile has its heartButtonPressed member property to false initially, so inverting it will be fine.
-                    val favoriteImagePath = FavoritedImage(filePath)
+                    val favoriteImagePath = FavoritedImage(it.filePath)
                     val favoritesList = sharedGallery.favoriteImages.value
-                    val inFavorites = favoritesList?.contains(filePath)
-                    inFavorites?.apply {
+                    val inFavorites = favoritesList?.contains(it.filePath)
+                    inFavorites?.let {
                         if (!inFavorites) {
                             // Will trigger the favoriteImages Observable -> calling toggleHeartImageButton()
                             sharedGallery.addToFavoritesDB(favoriteImagePath)
@@ -153,11 +178,7 @@ class MediaViewPagerFragment : Fragment() {
 
         mediaViewModel.trashButtonPressed.observe(viewLifecycleOwner, Observer { trashButtonClicked ->
             if (trashButtonClicked) {
-                val currentImage = getImageFileFromAdapter(mediaViewPager.currentItem)
-                currentImage?.apply {
-                    sharedGallery.removeImageFile(currentImage)
-                }
-                mediaViewModel.trashButtonClickedDone()
+                DeleteAlertDialogFragment().show(childFragmentManager, "trash_button")
             }
         })
     }
@@ -250,4 +271,5 @@ class MediaViewPagerFragment : Fragment() {
         val adapter = mediaViewPager.adapter as MediaViewPagerAdapter?
         return adapter?.getImageFile(position)
     }
+
 }

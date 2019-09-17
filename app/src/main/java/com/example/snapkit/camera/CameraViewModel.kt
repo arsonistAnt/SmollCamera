@@ -57,9 +57,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun onFlashButtonClicked() {
         val flashSettingEnums = CameraFlash.values()
-        val currentFlashSettingsPos = _flashSettings.value?.ordinal
-        currentFlashSettingsPos?.apply {
-            val newEnumPosition = (currentFlashSettingsPos + 1) % flashSettingEnums.size
+        _flashSettings.value?.let {
+            val newEnumPosition = (it.ordinal + 1) % flashSettingEnums.size
             _flashSettings.value = flashSettingEnums[newEnumPosition]
         }
     }
