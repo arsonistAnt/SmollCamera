@@ -32,9 +32,8 @@ class ThumbnailGalleryFragment : Fragment() {
         initViewModel()
         initRecyclerView()
         setupSystemWindows()
-        binding.button.setOnClickListener {
-            sharedGallery.updateImageFiles()
-        }
+        initRecyclerView()
+        setupToolBar()
         return binding.root
     }
 
@@ -118,6 +117,26 @@ class ThumbnailGalleryFragment : Fragment() {
                 bottom = windowInsets.systemWindowInsetBottom + botPadding
             )
             windowInsets
+        }
+    }
+
+    /**
+     * Configure the tool bar for this fragment.
+     */
+    private fun setupToolBar() {
+        val toolBar = binding.thumbnailToolbar
+        toolBar.inflateMenu(R.menu.thumbnail_gallery_menu)
+        toolBar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.camera_menu_item -> {
+                    val navController = findNavController()
+                    val actionToCamera =
+                        ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToCameraViewFragment2()
+                    navController.navigate(actionToCamera)
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
+            }
         }
     }
 }

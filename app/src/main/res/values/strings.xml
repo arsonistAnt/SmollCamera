@@ -19,4 +19,7 @@
     <!--Miscellaneous-->
     <string name="refresh_temp_delete_later">Refresh</string>
     <string name="file_authority">com.example.snapkit.fileprovider</string>
+    <string name="thumbnail_tool_bar_title">Gallery</string>
+    <string name="item_name_camera">Camera</string>
+    <string name="favorites_menu_item">Sort by Favorites</string>
 </resources>

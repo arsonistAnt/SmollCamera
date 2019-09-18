@@ -10,6 +10,7 @@
 
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:text="@string/delete_alert_title"
+              android:id="@+id/delete_alert_message"
               android:textColor="@color/white" android:textSize="18sp"
               android:layout_gravity="center" android:textAlignment="center"/>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android">
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/gallery_layout"
@@ -19,12 +19,24 @@
                 app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="@+id/gallery_recycler_view"/>
         <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 android:background="@color/black"
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
-                android:id="@+id/gallery_recycler_view" tools:layout_editor_absoluteY="254dp"
-                tools:layout_editor_absoluteX="59dp"/>
+                android:id="@+id/gallery_recycler_view"
+                app:layout_constraintTop_toBottomOf="@+id/thumbnail_toolbar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+        </androidx.recyclerview.widget.RecyclerView>
+        <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/not_quite_black"
+                android:theme="?attr/actionBarTheme"
+                android:minHeight="?attr/actionBarSize" android:id="@+id/thumbnail_toolbar"
+                app:layout_constraintTop_toTopOf="parent" app:title="@string/thumbnail_tool_bar_title"
+                app:titleTextColor="@color/white"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
