@@ -46,13 +46,15 @@ class CameraViewFragment : Fragment() {
 
         if (hasPermissions(requireContext(), *permissions)) {
             initCameraView()
+            // Initialize any observers pertaining to the CameraView
+            initCameraObservers()
         }
         //Set system ui
         setupSystemWindows()
-        // Observe the values from the viewModel.
-        initObservers()
         // Set onClickListeners for states/events that doesn't need to be tracked by the View Model.
         setOnClickListeners()
+        // Observe the values from the viewModel.
+        initObservers()
         return binding.root
     }
 
@@ -86,7 +88,11 @@ class CameraViewFragment : Fragment() {
                         fromDialog = true
                     }
 
-                    override fun onAllPermissionsAccepted() = viewModel.cameraNotInitialized()
+                    override fun onAllPermissionsAccepted() {
+                        viewModel.cameraNotInitialized()
+                        // Initialize any observers pertaining to the CameraView
+                        initCameraObservers()
+                    }
                 }
                 // Request user for permission before opening the camera.
                 requestForPermissions(requireActivity(), permCallBacks, *permissions)
@@ -140,6 +146,7 @@ class CameraViewFragment : Fragment() {
         viewModel.isCameraInitialized.observe(viewLifecycleOwner, Observer { isInitialized ->
             if (!isInitialized && hasPermissions(requireContext(), *permissions)) {
                 initCameraView()
+                initCameraObservers()
                 viewModel.cameraInitialized()
             }
         })
@@ -162,7 +169,14 @@ class CameraViewFragment : Fragment() {
                 //TODO: Animation
             }
         })
+    }
 
+    /**
+     * Initialize any Observers that involves modifying the CameraView attributes.
+     */
+    private fun initCameraObservers() {
+        // Remove any possible duplicate observer that may have been added.
+        viewModel.flashSettings.removeObservers(viewLifecycleOwner)
         // Switch the flash settings mode when flash button is clicked.
         viewModel.flashSettings.observe(viewLifecycleOwner, Observer { setting ->
             val resourceID = when (setting) {
