@@ -130,6 +130,10 @@ class ThumbnailGalleryFragment : Fragment() {
     private fun setupToolBar() {
         val toolBar = binding.thumbnailToolbar
         toolBar.inflateMenu(R.menu.thumbnail_gallery_menu)
+        // Hide the "Show All" filter item initially.
+        val allFilterMenuItem = toolBar.menu.findItem(R.id.all_filter_menu_item).apply { isVisible = false }
+        val favoritesFilterMenuItem = toolBar.menu.findItem(R.id.favorites_filter_menu_item)
+
         toolBar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.camera_menu_item -> {
@@ -139,10 +143,21 @@ class ThumbnailGalleryFragment : Fragment() {
                     navController.navigate(actionToCamera)
                     true
                 }
-                R.id.favorites_menu_item -> {
+                R.id.all_filter_menu_item -> {
+                    // Show all images
+                    thumbnailGalleryAdapter.submitList(sharedGallery.mediaFiles.value)
+                    // Hide the "Show All Images" option and show the "Filter by Favorites"
+                    favoritesFilterMenuItem.isVisible = true
+                    allFilterMenuItem.isVisible = false
+                    true
+                }
+                R.id.favorites_filter_menu_item -> {
                     // Replace the current in the adapter with the list of favorite images.
                     val favoritesList = sharedGallery.mediaFiles.value?.filter { file -> file.hearted }
                     thumbnailGalleryAdapter.submitList(favoritesList)
+                    // Hide the "Filter by Favorites" option and show the "Show All Images"
+                    favoritesFilterMenuItem.isVisible = false
+                    allFilterMenuItem.isVisible = true
                     true
                 }
                 else -> {
