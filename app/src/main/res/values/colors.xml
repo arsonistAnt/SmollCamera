@@ -9,8 +9,9 @@
     <color name="primaryTextColor">#FFFFFF</color>
     <color name="statusBarColor">#80000000</color>
     <color name="black">#000000</color>
-    <color name="blackTint">#6F000000</color>
+    <color name="blackTint">#16000000</color>
     <color name="white">#FFFFFF</color>
     <color name="not_quite_black">#23272A</color>
+    <color name="not_quite_white">#FFFAFA</color>
 
 </resources>

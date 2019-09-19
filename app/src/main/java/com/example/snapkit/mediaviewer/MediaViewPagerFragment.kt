@@ -240,10 +240,12 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
         sysWindowsVisible = if (sysWindowsVisible) {
             hideSysWindows(activityWindow)
             binding.mediaMenuLayout.visibility = View.GONE
+            binding.gradientContainerLayout.visibility = View.GONE
             false
         } else {
             showSysWindows(activityWindow)
             binding.mediaMenuLayout.visibility = View.VISIBLE
+            binding.gradientContainerLayout.visibility = View.VISIBLE
             true
         }
     }
