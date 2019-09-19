@@ -53,7 +53,7 @@ interface FavoritedImageDao {
     fun getFavorites(): LiveData<List<FavoritedImage>>
 
     @Query("SELECT * FROM favorite_images")
-    fun getFavoritesAsync(): LiveData<List<FavoritedImage>>
+    fun getFavoritesAsync(): List<FavoritedImage>
 }
 
 @Database(entities = [MediaFile::class, FavoritedImage::class], version = 4)

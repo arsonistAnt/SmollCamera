@@ -38,7 +38,20 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     init {
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
         mediaFiles = Transformations.map(mediaDB.mediaFileDao().getMediaFiles()) { mediaFiles ->
-            mediaFiles.toImageFiles()
+            val imageFiles = mediaFiles.toImageFiles()
+            // Get the cached "Favorited Images" and apply the hearted property to true if the image file has been favorited.
+            viewModelScope.launch {
+                val favoriteImages = mediaDB.favoritedImagesDao().getFavoritesAsync()
+                imageFiles.map { file ->
+                    // Check if the image file in the mediaDB is in the favorited images database.
+                    val favoritesObject = favoriteImages.find { file.filePath == it.uri }
+                    favoritesObject?.apply {
+                        file.hearted = true
+                    }
+                    file
+                }
+            }
+            imageFiles
         }
         // Modify the return value so that we get string uri paths instead.
         favoriteImages = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->

@@ -44,6 +44,7 @@ class CameraViewFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
         binding.viewModel = viewModel
 
+        // Check for permissions that require any camera usage.
         if (hasPermissions(requireContext(), *permissions)) {
             initCameraView()
             // Initialize any observers pertaining to the CameraView

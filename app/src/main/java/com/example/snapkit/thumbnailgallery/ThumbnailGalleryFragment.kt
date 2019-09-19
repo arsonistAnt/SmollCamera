@@ -71,13 +71,17 @@ class ThumbnailGalleryFragment : Fragment() {
      */
     private fun initRecyclerView() {
         val layoutManager = GridLayoutManager(requireContext(), 3)
-        thumbnailGalleryAdapter = ThumbnailGalleryAdapter(OnClickThumbnailListener { clickPosition ->
+        thumbnailGalleryAdapter = ThumbnailGalleryAdapter(OnClickThumbnailListener { _, imageFile ->
             // Navigate to the ImageViewer when any of the image thumbnail is clicked.
             val navController = findNavController()
+            // Click position passed from adapter is no longer reliable, use the index of the shared list instead.
+            val indexPosition = sharedGallery.mediaFiles.value?.indexOf(imageFile)
             // Pass the clickPosition to the MediaViewer using safe args.
-            val actionToMediaViewPager =
-                ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(clickPosition)
-            navController.navigate(actionToMediaViewPager)
+            indexPosition?.let {
+                val actionToMediaViewPager =
+                    ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(indexPosition)
+                navController.navigate(actionToMediaViewPager)
+            }
         })
         // Recycler view needs a layout manager and a user defined Adapter class that extends RecyclerAdapter.
         binding.galleryRecyclerView.apply {
@@ -135,7 +139,15 @@ class ThumbnailGalleryFragment : Fragment() {
                     navController.navigate(actionToCamera)
                     true
                 }
-                else -> super.onOptionsItemSelected(item)
+                R.id.favorites_menu_item -> {
+                    // Replace the current in the adapter with the list of favorite images.
+                    val favoritesList = sharedGallery.mediaFiles.value?.filter { file -> file.hearted }
+                    thumbnailGalleryAdapter.submitList(favoritesList)
+                    true
+                }
+                else -> {
+                    super.onOptionsItemSelected(item)
+                }
             }
         }
     }

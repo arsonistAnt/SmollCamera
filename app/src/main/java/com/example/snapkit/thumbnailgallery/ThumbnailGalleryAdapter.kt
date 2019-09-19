@@ -37,13 +37,14 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
     }
 
     override fun onBindViewHolder(holder: ThumbnailViewHolder, position: Int) {
-        var imageView = holder.thumbnail.thumbnailView
-        var filePath = getItem(position).filePath
+        val imageView = holder.thumbnail.thumbnailView
+        val imageFile = getItem(position)
+        val filePath = getItem(position).filePath
+        // Call the OnClickThumbnailListener in the onClick method of the ImageView.
         imageView.setOnClickListener {
-            onClickListener.onClick(position)
+            onClickListener.onClick(position, imageFile)
         }
-
-        // TODO: Move this glide implementation into the BindingAdapter.kt.
+        // Load the image with glide.
         Glide.with(imageView.context)
             .load(filePath)
             .centerCrop()
@@ -51,9 +52,18 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
     }
 }
 
-class OnClickThumbnailListener(var onClickListener: (position: Int) -> Unit) {
+/**
+ * An OnClickListener class for the ThumbnailGalleryAdapter class.
+ */
+class OnClickThumbnailListener(var onClickListener: (position: Int, imageFile: ImageFile) -> Unit) {
 
-    fun onClick(position: Int) {
-        onClickListener(position)
+    /**
+     * An onClick listener event for the ViewHolder.
+     *
+     * @param position the position of the view holder in the adapter.
+     * @param imageFile the ImageFile object that's relative to the position in the adapter.
+     */
+    fun onClick(position: Int, imageFile: ImageFile) {
+        onClickListener(position, imageFile)
     }
 }
