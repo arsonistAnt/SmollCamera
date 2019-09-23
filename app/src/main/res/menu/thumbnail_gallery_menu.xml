@@ -4,8 +4,16 @@
             android:id="@+id/camera_menu_item"
             android:icon="@drawable/ic_camera_button"
             android:title="@string/item_name_camera"
-            app:showAsAction="always"
+            app:showAsAction="ifRoom"
     />
+
+    <item
+            android:id="@+id/trash_menu_item"
+            android:icon="@drawable/ic_trash_menu_item"
+            android:title="@string/item_name_trash"
+            app:showAsAction="ifRoom"
+    />
+
     <item android:id="@+id/favorites_filter_menu_item"
           android:title="@string/favorites_menu_item"
     />

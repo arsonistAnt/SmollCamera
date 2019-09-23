@@ -21,6 +21,7 @@
     <string name="file_authority">com.example.snapkit.fileprovider</string>
     <string name="thumbnail_tool_bar_title">Gallery</string>
     <string name="item_name_camera">Camera</string>
+    <string name="item_name_trash">Trash</string>
     <string name="favorites_menu_item">Filter by Favorites</string>
     <string name="show_all_images_menu_items">Show All Images</string>
 </resources>

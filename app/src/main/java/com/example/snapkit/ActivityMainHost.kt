@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
 import timber.log.Timber
 
 class ActivityMainHost : AppCompatActivity() {
@@ -14,6 +15,26 @@ class ActivityMainHost : AppCompatActivity() {
         setupTimber()
         setSystemWindows()
         setContentView(R.layout.activity_main_host)
+    }
+
+    override fun onBackPressed() {
+        // Get the callback result from the current fragment in the navigation host fragment.
+        try {
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment) as? NavHostFragment
+            var consumed = false
+            navHostFragment?.apply {
+                // Get the current fragment from the NavHostFragment
+                val currentFragment = navHostFragment.childFragmentManager.fragments[0]
+                val activityHostListener = currentFragment as? ActivityMainHostListener
+                activityHostListener?.let {
+                    consumed = activityHostListener.onBackButtonPressed()
+                }
+            }
+            if (!consumed)
+                super.onBackPressed()
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
     }
 
     /**
@@ -39,4 +60,17 @@ class ActivityMainHost : AppCompatActivity() {
                         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 )
     }
+}
+
+/**
+ * A listener interface for fragments to implement call backs on the ActivityMainHost.
+ */
+interface ActivityMainHostListener {
+
+    /**
+     * An event listener for onBackPressed() in the ActivityMainHost.
+     *
+     * @return a boolean that determines whether or not the event has been consumed.
+     */
+    fun onBackButtonPressed(): Boolean
 }
