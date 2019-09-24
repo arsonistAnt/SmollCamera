@@ -121,12 +121,12 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
             setLayoutManager(layoutManager)
             adapter = thumbnailGalleryAdapter
         }
+
         thumbnailGalleryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 super.onItemRangeInserted(positionStart, itemCount)
-                if (itemCount == 1) {
+                if (itemCount == 1 && (currentFilterMode != FilterMode.FAVORITES))
                     thumbnailGalleryAdapter.notifyItemMoved(positionStart, 0)
-                }
             }
         })
 
@@ -204,6 +204,7 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                     // Replace the current in the adapter with the list of favorite images.
                     val favoritesList = sharedGallery.mediaFiles.value?.filter { file -> file.hearted }
                     thumbnailGalleryAdapter.submitList(favoritesList)
+
                     // Hide the "Filter by Favorites" option and show the "Show All Images"
                     favoritesFilterMenuItem.isVisible = false
                     allFilterMenuItem.isVisible = true

@@ -56,26 +56,25 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
         imageView.apply {
             setOnClickListener {
                 if (_longPressDeleteEnabled) {
-                    toggleHighlightSelection(imageFrame, imageFile, position)
+                    toggleHighlightSelection(imageFrame, imageFile, holder.adapterPosition)
                 } else {
-                    onClickListener.onClick(position, imageFile, imageView)
+                    onClickListener.onClick(holder.adapterPosition, imageFile, imageView)
                 }
             }
             setOnLongClickListener {
                 addSelectionHighlight(imageFrame)
                 enableLongPressDeletion()
                 // Add the data pertaining to the view to the selected items.
-                selectedItems.add(Pair(imageFile, position))
-                onClickListener.onLongClick(position, imageFile, imageView)
+                selectedItems.add(Pair(imageFile, holder.adapterPosition))
+                onClickListener.onLongClick(holder.adapterPosition, imageFile, imageView)
                 true
             }
         }
         // Check to see if the imageFrame SHOULD be highlighted after the ViewHolder has been re-used.
-        when (selectedItems.contains(Pair(imageFile, position))) {
+        when (selectedItems.contains(Pair(imageFile, holder.adapterPosition))) {
             true -> addSelectionHighlight(imageFrame)
             else -> removeSelectionHighlight(imageFrame)
         }
-
         // Load the image with glide.
         Glide.with(imageView.context)
             .load(filePath)
@@ -130,7 +129,6 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
     private fun removeSelectionHighlight(view: FrameLayout) {
         view.foreground = null
     }
-
 
     /**
      * Enable the long press selection mode.
