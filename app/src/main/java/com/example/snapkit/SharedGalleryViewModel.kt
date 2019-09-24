@@ -10,7 +10,7 @@ import com.example.snapkit.database.MediaFile
 import com.example.snapkit.database.MediaFileDatabase
 import com.example.snapkit.database.getDatabase
 import com.example.snapkit.domain.ImageFile
-import com.example.snapkit.utils.deleteFileFromMediaStore
+import com.example.snapkit.utils.deleteFilesFromMediaStore
 import com.example.snapkit.utils.getImagesFromMediaStore
 import com.example.snapkit.utils.toImageFiles
 import com.example.snapkit.utils.toMediaFiles
@@ -26,8 +26,8 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     // Store cached media file info into a live data.
     var mediaFiles: LiveData<List<ImageFile>>
 
-    // Store list of favorite images.
-    var favoriteImages: LiveData<List<String>>
+    // Store list of favorite image uris, will mainly be used for toggling the heart icon in the MediaViewPager.
+    var favoriteImagesUri: LiveData<List<String>>
 
     // Co-routine variables.
     private var viewModelJob = Job()
@@ -39,22 +39,11 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
         mediaFiles = Transformations.map(mediaDB.mediaFileDao().getMediaFiles()) { mediaFiles ->
             val imageFiles = mediaFiles.toImageFiles()
-            // Get the cached "Favorited Images" and apply the hearted property to true if the image file has been favorited.
-            viewModelScope.launch {
-                val favoriteImages = mediaDB.favoritedImagesDao().getFavoritesAsync()
-                imageFiles.map { file ->
-                    // Check if the image file in the mediaDB is in the favorited images database.
-                    val favoritesObject = favoriteImages.find { file.filePath == it.uri }
-                    favoritesObject?.apply {
-                        file.hearted = true
-                    }
-                    file
-                }
-            }
+            attachHeartedAttributeAsync(imageFiles)
             imageFiles
         }
         // Modify the return value so that we get string uri paths instead.
-        favoriteImages = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->
+        favoriteImagesUri = Transformations.map(mediaDB.favoritedImagesDao().getFavorites()) { favorites ->
             favorites.map { it.uri }
         }
     }
@@ -78,7 +67,7 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
             val staleFiles = cachedFiles.await().subtract(updatedFiles).toList()
             mediaDB.mediaFileDao().delete(staleFiles)
 
-            // Upsert the newly fetched files to the database.
+            // Update-insert the newly fetched files to the database.
             mediaDB.mediaFileDao().insertAll(mediaStoreFiles.await())
         }
     }
@@ -92,11 +81,32 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
         val context = getApplication() as Context
         viewModelScope.launch {
             // Remove the file from the media store.
-            deleteFileFromMediaStore(context, imageFile.filePath)
+
+            deleteFilesFromMediaStore(context, arrayOf(imageFile.filePath))
             // Remove the file from the cache
             val deletedMediaFile =
                 MediaFile(imageFile.filePath, imageFile.dateCreated, imageFile.timeCreated, imageFile.dateTakenLong)
             mediaDB.mediaFileDao().delete(arrayListOf(deletedMediaFile))
+            mediaDB.favoritedImagesDao().delete(listOf(FavoritedImage(imageFile.filePath)))
+        }
+    }
+
+    /**
+     * Batch remove image files from the application.
+     *
+     * @param imageFiles ImageFile objects that will be used for deletion.
+     */
+    fun removeImageFiles(imageFiles: List<ImageFile>) {
+        val context = getApplication() as Context
+        viewModelScope.launch {
+            // Remove the files from the cache
+            val staleMediaFiles = imageFiles.toMediaFiles()
+            mediaDB.mediaFileDao().delete(staleMediaFiles)
+            // Remove the files from the media store.
+            val staleUris = staleMediaFiles.map { it.uri }
+            deleteFilesFromMediaStore(context, staleUris.toTypedArray())
+            val staleFavoritedUris = staleMediaFiles.map { FavoritedImage(it.uri) }
+            mediaDB.favoritedImagesDao().delete(staleFavoritedUris)
         }
     }
 
@@ -118,7 +128,26 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
      */
     fun removeFromFavoritesDB(favoriteImage: FavoritedImage) {
         viewModelScope.launch {
-            mediaDB.favoritedImagesDao().delete(favoriteImage)
+            mediaDB.favoritedImagesDao().delete(listOf(favoriteImage))
+        }
+    }
+
+    /**
+     * Change the hearted member property to true in each ImageFile object if its uri is in the favorites table.
+     *
+     * @param imageFiles the list of ImageFile objects that will have its hearted member property modified.
+     */
+    private fun attachHeartedAttributeAsync(imageFiles: List<ImageFile>) {
+        viewModelScope.launch {
+            val favoriteImages = mediaDB.favoritedImagesDao().getFavoritesAsync()
+            imageFiles.map { file ->
+                // Check if the image file in the mediaDB is in the favorited images database.
+                val favoritesObject = favoriteImages.find { file.filePath == it.uri }
+                favoritesObject?.apply {
+                    file.hearted = true
+                }
+                file
+            }
         }
     }
 }

@@ -75,7 +75,10 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
             true -> addSelectionHighlight(imageFrame)
             else -> removeSelectionHighlight(imageFrame)
         }
-        // Load the image with glide.
+        // Remove any previous data.
+        Glide.with(imageView.context)
+            .clear(imageView)
+        // Load image into glide.
         Glide.with(imageView.context)
             .load(filePath)
             .centerCrop()

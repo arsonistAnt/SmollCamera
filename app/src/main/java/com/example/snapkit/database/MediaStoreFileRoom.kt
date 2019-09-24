@@ -47,7 +47,7 @@ interface FavoritedImageDao {
     suspend fun insertFileUri(favoriteImage: FavoritedImage)
 
     @Delete
-    suspend fun delete(favoriteImage: FavoritedImage)
+    suspend fun delete(favoriteImage: List<FavoritedImage>)
 
     @Query("SELECT * FROM favorite_images")
     fun getFavorites(): LiveData<List<FavoritedImage>>

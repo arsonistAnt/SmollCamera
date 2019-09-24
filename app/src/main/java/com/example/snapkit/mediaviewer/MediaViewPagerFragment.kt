@@ -109,7 +109,7 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
     private fun handleHeartIcon(position: Int) {
         val currentImageFile = getImageFileFromAdapter(position)
         currentImageFile?.let {
-            val favoritesList = sharedGallery.favoriteImages.value
+            val favoritesList = sharedGallery.favoriteImagesUri.value
             val hearted = favoritesList?.contains(it.filePath)
             hearted?.let {
                 toggleHeartImageButton(hearted)
@@ -133,7 +133,7 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             }
         })
 
-        sharedGallery.favoriteImages.observe(viewLifecycleOwner, Observer { _ ->
+        sharedGallery.favoriteImagesUri.observe(viewLifecycleOwner, Observer { _ ->
             handleHeartIcon(mediaViewPager.currentItem)
         })
 
@@ -160,14 +160,14 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
                 imageFile?.let {
                     // By default ImageFile has its heartButtonPressed member property to false initially, so inverting it will be fine.
                     val favoriteImagePath = FavoritedImage(it.filePath)
-                    val favoritesList = sharedGallery.favoriteImages.value
+                    val favoritesList = sharedGallery.favoriteImagesUri.value
                     val inFavorites = favoritesList?.contains(it.filePath)
                     inFavorites?.let {
                         if (!inFavorites) {
-                            // Will trigger the favoriteImages Observable -> calling toggleHeartImageButton()
+                            // Will trigger the favoriteImagesUri Observable -> calling toggleHeartImageButton()
                             sharedGallery.addToFavoritesDB(favoriteImagePath)
                         } else {
-                            // Will trigger the favoriteImages Observable -> calling toggleHeartImageButton()
+                            // Will trigger the favoriteImagesUri Observable -> calling toggleHeartImageButton()
                             sharedGallery.removeFromFavoritesDB(favoriteImagePath)
                         }
                     }

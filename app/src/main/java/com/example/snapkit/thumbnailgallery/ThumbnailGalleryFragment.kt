@@ -13,7 +13,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.snapkit.ActivityMainHostListener
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
@@ -122,13 +121,13 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
             adapter = thumbnailGalleryAdapter
         }
 
-        thumbnailGalleryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                super.onItemRangeInserted(positionStart, itemCount)
-                if (itemCount == 1 && (currentFilterMode != FilterMode.FAVORITES))
-                    thumbnailGalleryAdapter.notifyItemMoved(positionStart, 0)
-            }
-        })
+//        thumbnailGalleryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+//                super.onItemRangeInserted(positionStart, itemCount)
+//                if (itemCount == 1 && (currentFilterMode != FilterMode.FAVORITES))
+//                    thumbnailGalleryAdapter.notifyItemMoved(positionStart, 0)
+//            }
+//        })
 
         binding.galleryRecyclerView.setOnKeyListener { _, _, keyEvent ->
             if (keyEvent.keyCode == KeyEvent.KEYCODE_BACK &&
@@ -147,7 +146,18 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
 
         sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { thumbnailFiles ->
-            thumbnailGalleryAdapter.submitList(thumbnailFiles)
+            if (currentFilterMode != FilterMode.FAVORITES)
+                thumbnailGalleryAdapter.submitList(thumbnailFiles)
+        })
+
+        // Resubmit the list of favorited images of if the user has deleted images from the Favorites Filter.
+        sharedGallery.favoriteImagesUri.observe(viewLifecycleOwner, Observer { favoritesList ->
+            if (currentFilterMode == FilterMode.FAVORITES) {
+                sharedGallery.mediaFiles.value?.let { thumbnailFiles ->
+                    val favorites = thumbnailFiles.filter { it.hearted }
+                    thumbnailGalleryAdapter.submitList(favorites)
+                }
+            }
         })
     }
 
@@ -209,6 +219,16 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                     favoritesFilterMenuItem.isVisible = false
                     allFilterMenuItem.isVisible = true
                     currentFilterMode = FilterMode.FAVORITES
+                    true
+                }
+                R.id.trash_menu_item -> {
+                    val selectedItems = thumbnailGalleryAdapter.selectedItems
+                    if (selectedItems.size > 0) {
+                        val selectedImageFiles = selectedItems.map { it.first }
+                        sharedGallery.removeImageFiles(selectedImageFiles)
+                        showToolBarItemsOnSelection()
+                        thumbnailGalleryAdapter.disableLongPressDeletion()
+                    }
                     true
                 }
                 else -> {
