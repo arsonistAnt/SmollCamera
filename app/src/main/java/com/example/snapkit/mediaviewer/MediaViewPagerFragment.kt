@@ -71,8 +71,9 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
         val currentImage = getImageFileFromAdapter(mediaViewPager.currentItem)
         currentImage?.apply {
             sharedGallery.removeImageFile(currentImage)
+            mediaViewModel.currentItemPosition = mediaViewPager.currentItem
+
         }
-        mediaViewModel.trashButtonClickedDone()
     }
 
     /**
@@ -130,6 +131,14 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             mediaViewPager.currentItem = safeFragmentArgs.clickPosition
             mediaViewPager.onSingleTap {
                 toggleSystemUI()
+            }
+
+            // Set currentItem after the trashButton has been pressed.
+            mediaViewModel.trashButtonPressed.value?.let { pressed ->
+                if (pressed) {
+                    mediaViewPager.currentItem = mediaViewModel.currentItemPosition
+                    mediaViewModel.trashButtonClickedDone()
+                }
             }
         })
 

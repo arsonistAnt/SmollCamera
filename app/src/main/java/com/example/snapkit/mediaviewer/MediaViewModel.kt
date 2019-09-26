@@ -25,6 +25,9 @@ class MediaViewModel : ViewModel() {
     val trashButtonPressed: LiveData<Boolean>
         get() = _trashButtonPressed
 
+    // Store the current item position of the MediaViewPager, used to snap back to the next position after deleting an image.
+    var currentItemPosition = 0
+
     /**
      * Set _heartButtonPressed to true if user has clicked on heart button.
      */
