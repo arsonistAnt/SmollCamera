@@ -6,7 +6,7 @@
               android:name="com.example.snapkit.thumbnailgallery.ThumbnailGalleryFragment"
               android:label="ImageGalleryFragment">
         <action android:id="@+id/action_imageGalleryFragment_to_mediaViewPagerFragment"
-                app:destination="@+id/mediaViewPagerFragment" app:popUpTo="@+id/cameraViewFragment2"/>
+                app:destination="@+id/mediaViewPagerFragment"/>
         <action android:id="@+id/action_imageGalleryFragment_to_cameraViewFragment2"
                 app:destination="@id/cameraViewFragment2" app:popUpTo="@+id/cameraViewFragment2"
                 app:popUpToInclusive="true"/>
@@ -14,13 +14,14 @@
     <fragment android:id="@+id/cameraViewFragment2" android:name="com.example.snapkit.camera.CameraViewFragment"
               android:label="CameraViewFragment">
         <action android:id="@+id/action_cameraViewFragment2_to_mediaViewPagerFragment"
-                app:destination="@id/mediaViewPagerFragment" app:enterAnim="@anim/nav_default_enter_anim"/>
+                app:destination="@id/mediaViewPagerFragment"
+        />
     </fragment>
     <fragment android:id="@+id/mediaViewPagerFragment"
               android:name="com.example.snapkit.mediaviewer.MediaViewPagerFragment"
               android:label="MediaViewPagerFragment">
         <argument android:name="clickPosition" app:argType="integer"/>
-        <action android:id="@+id/action_mediaViewPagerFragment_to_imageGalleryFragment"
-                app:destination="@id/imageGalleryFragment"/>
+        <action android:id="@+id/action_mediaViewPagerFragment_to_imageGalleryFragment2"
+                app:destination="@id/imageGalleryFragment" app:launchSingleTop="false"/>
     </fragment>
 </navigation>

@@ -23,6 +23,24 @@ class MediaFileRepository(private val application: Context) {
     private var repositoryScope = CoroutineScope(repositoryJob)
 
     /**
+     * Return the MediaFile records asynchronously in the cache.
+     *
+     * @return a list of MediaFile objects.
+     */
+    private suspend fun getMediaFilesAsync(): List<MediaFile> {
+        return mediaDB.mediaFileDao().getMediaFilesAsync()
+    }
+
+    /**
+     * Retrieve image files from the MediaStore and return a list of ImageFile objects.
+     *
+     * @return a list of ImageFile objects.
+     */
+    private fun getMediaStoreImages(): List<ImageFile> {
+        return getImagesFromMediaStore(application)
+    }
+
+    /**
      * Change the hearted member property to true in each ImageFile object if its uri is in the favorites table.
      *
      * @param imageFiles the list of ImageFile objects that will have its hearted member property modified.
@@ -60,21 +78,14 @@ class MediaFileRepository(private val application: Context) {
     }
 
     /**
-     * Return the MediaFile records asynchronously in the cache.
+     * Add an image to the favorited_images table.
      *
-     * @return a list of MediaFile objects.
+     * @param favoriteImage a database entity object that will be added to the favorite_images table.
      */
-    private suspend fun getMediaFilesAsync(): List<MediaFile> {
-        return mediaDB.mediaFileDao().getMediaFilesAsync()
-    }
-
-    /**
-     * Retrieve image files from the MediaStore and return a list of ImageFile objects.
-     *
-     * @return a list of ImageFile objects.
-     */
-    private fun getMediaStoreImages(): List<ImageFile> {
-        return getImagesFromMediaStore(application)
+    fun addToFavoritesDB(favoriteImage: FavoritedImage) {
+        repositoryScope.launch {
+            mediaDB.favoritedImagesDao().insertFileUri(favoriteImage)
+        }
     }
 
     /**
@@ -135,17 +146,6 @@ class MediaFileRepository(private val application: Context) {
             // Remove the file uri from the favorites cache.
             val staleFavoritedUris = staleMediaFiles.map { FavoritedImage(it.uri) }
             mediaDB.favoritedImagesDao().delete(staleFavoritedUris)
-        }
-    }
-
-    /**
-     * Add an image to the favorited_images table.
-     *
-     * @param favoriteImage a database entity object that will be added to the favorite_images table.
-     */
-    fun addToFavoritesDB(favoriteImage: FavoritedImage) {
-        repositoryScope.launch {
-            mediaDB.favoritedImagesDao().insertFileUri(favoriteImage)
         }
     }
 
