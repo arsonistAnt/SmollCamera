@@ -11,6 +11,7 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.snapkit.ActivityMainHostListener
@@ -33,13 +34,16 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
 
     private var currentFilterMode = FilterMode.NEUTRAL
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
-        initViewModel()
         initRecyclerView()
         setupSystemWindows()
         setupToolBar()
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        initViewModel()
         return binding.root
     }
 
@@ -93,13 +97,19 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                 val navController = findNavController()
                 // Click position passed from adapter is no longer reliable, use the index of the shared list instead.
                 val indexPosition = sharedGallery.mediaFiles.value?.indexOf(imageFile)
+                // Provide the navigation controller the shared element transition mapping.
+                sharedGallery.transitioning = true
+                val transitionName = ViewCompat.getTransitionName(view) ?: ""
+                val extras = FragmentNavigatorExtras(
+                    view to transitionName
+                )
                 // Pass the clickPosition to the MediaViewer using safe args.
                 indexPosition?.let {
                     val actionToMediaViewPager =
                         ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToMediaViewPagerFragment(
                             indexPosition
                         )
-                    navController.navigate(actionToMediaViewPager)
+                    navController.navigate(actionToMediaViewPager, extras)
                 }
             }
 
@@ -120,14 +130,6 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
             setLayoutManager(layoutManager)
             adapter = thumbnailGalleryAdapter
         }
-
-//        thumbnailGalleryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-//                super.onItemRangeInserted(positionStart, itemCount)
-//                if (itemCount == 1 && (currentFilterMode != FilterMode.FAVORITES))
-//                    thumbnailGalleryAdapter.notifyItemMoved(positionStart, 0)
-//            }
-//        })
 
         binding.galleryRecyclerView.setOnKeyListener { _, _, keyEvent ->
             if (keyEvent.keyCode == KeyEvent.KEYCODE_BACK &&

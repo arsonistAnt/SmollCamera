@@ -22,6 +22,9 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     // A repository object that handles fetching/updating/removing image files.
     private var imageRepository = MediaFileRepository(application)
 
+    // Keep track of the transitioning process from destination to destination.
+    var transitioning = false
+
     init {
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
         mediaFiles = Transformations.map(imageRepository.getMediaFiles()) { mediaFiles ->

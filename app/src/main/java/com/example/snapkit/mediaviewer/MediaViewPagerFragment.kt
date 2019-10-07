@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.transition.TransitionInflater
+import android.transition.TransitionSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +26,7 @@ import com.example.snapkit.database.FavoritedImage
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
 import com.example.snapkit.domain.ImageFile
 import com.example.snapkit.utils.*
+import timber.log.Timber
 import java.io.File
 
 // Store the page margin value (in dp)
@@ -38,10 +41,19 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
     private val safeFragmentArgs: MediaViewPagerFragmentArgs by navArgs()
     private val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentMediaViewPagerBinding.inflate(inflater)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         sharedGallery = ViewModelProviders.of(requireActivity()).get(SharedGalleryViewModel::class.java)
         mediaViewModel = ViewModelProviders.of(requireActivity()).get(MediaViewModel::class.java)
+
+        // Start shared element transition.
+        setupSharedElementTransition()
+    }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = FragmentMediaViewPagerBinding.inflate(inflater)
+
         binding.viewModel = mediaViewModel
         initBottomNavBar()
         initMediaPager()
@@ -57,9 +69,33 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             mediaDialog.setMessage(getString(R.string.storage_dialog_message))
             mediaDialog.setTitle(R.string.permissions_dialog_title)
             requestForPermissions(requireActivity(), mediaDialog, *permissions)
-        } else {
+        } else if (!sharedGallery.transitioning) {
             sharedGallery.updateImageFiles()
+            Timber.i("Updating in onStart()")
         }
+    }
+
+    /**
+     * Setup the shared element transition for this fragment.
+     */
+    private fun setupSharedElementTransition() {
+        if (sharedGallery.transitioning)
+            postponeEnterTransition()
+        sharedElementEnterTransition =
+            TransitionInflater.from(requireContext()).inflateTransition(R.transition.image_transition)
+        (sharedElementEnterTransition as TransitionSet).addListener(object :
+            android.transition.Transition.TransitionListener {
+            override fun onTransitionEnd(p0: android.transition.Transition?) {
+                sharedGallery.transitioning = false
+                sharedGallery.updateImageFiles()
+                Timber.i("Updating in onEndAnimation")
+            }
+
+            override fun onTransitionResume(p0: android.transition.Transition?) {}
+            override fun onTransitionPause(p0: android.transition.Transition?) {}
+            override fun onTransitionCancel(p0: android.transition.Transition?) {}
+            override fun onTransitionStart(p0: android.transition.Transition?) {}
+        })
     }
 
     /**
@@ -150,7 +186,7 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             if (shouldNavigate) {
                 val navController = findNavController()
                 val actionToGallery =
-                    MediaViewPagerFragmentDirections.actionMediaViewPagerFragmentToImageGalleryFragment()
+                    MediaViewPagerFragmentDirections.actionMediaViewPagerFragmentToImageGalleryFragment2()
                 navController.navigate(actionToGallery)
                 mediaViewModel.navigateToGalleryDone()
             }

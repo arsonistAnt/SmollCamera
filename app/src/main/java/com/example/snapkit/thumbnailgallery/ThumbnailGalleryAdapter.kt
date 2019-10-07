@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +55,9 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
         val filePath = getItem(position).filePath
         // Call the OnClickThumbnailListener in the onClick method of the ImageView.
         imageView.apply {
+            // Set transition name for the shared element system.
+            ViewCompat.setTransitionName(imageView, filePath)
+
             setOnClickListener {
                 if (_longPressDeleteEnabled) {
                     toggleHighlightSelection(imageFrame, imageFile, holder.adapterPosition)
