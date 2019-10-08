@@ -210,9 +210,11 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
                     inFavorites?.let {
                         if (!inFavorites) {
                             // Will trigger the favoriteImagesUri Observable -> calling toggleHeartImageButton()
+                            imageFile.hearted = true
                             sharedGallery.addToFavorites(favoriteImagePath)
                         } else {
                             // Will trigger the favoriteImagesUri Observable -> calling toggleHeartImageButton()
+                            imageFile.hearted = false
                             sharedGallery.removeFavorite(favoriteImagePath)
                         }
                     }

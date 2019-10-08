@@ -96,7 +96,8 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                 // Navigate to the ImageViewer when any of the image thumbnail is clicked.
                 val navController = findNavController()
                 // Click position passed from adapter is no longer reliable, use the index of the shared list instead.
-                val indexPosition = sharedGallery.mediaFiles.value?.indexOf(imageFile)
+                val indexPosition =
+                    sharedGallery.mediaFiles.value?.indexOfFirst { file -> file.filePath == imageFile.filePath }
                 // Provide the navigation controller the shared element transition mapping.
                 sharedGallery.transitioning = true
                 val transitionName = ViewCompat.getTransitionName(view) ?: ""
