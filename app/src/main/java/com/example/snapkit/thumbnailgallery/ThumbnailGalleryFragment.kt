@@ -43,6 +43,7 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        postponeEnterTransition()
         initViewModel()
         return binding.root
     }
@@ -73,7 +74,6 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                 val thumbnailGalleryDialog = getPermissionAlertDialog(requireContext())
                 thumbnailGalleryDialog.setMessage(getString(R.string.storage_dialog_message))
                 thumbnailGalleryDialog.setTitle(R.string.permissions_dialog_title)
-
                 // Request user for permission before opening the gallery.
                 requestForPermissions(requireActivity(), thumbnailGalleryDialog, permission)
             } else {
@@ -99,7 +99,7 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
                 val indexPosition =
                     sharedGallery.mediaFiles.value?.indexOfFirst { file -> file.filePath == imageFile.filePath }
                 // Provide the navigation controller the shared element transition mapping.
-                sharedGallery.transitioning = true
+                sharedGallery.transitionToMediaViewPager = true
                 val transitionName = ViewCompat.getTransitionName(view) ?: ""
                 val extras = FragmentNavigatorExtras(
                     view to transitionName
@@ -130,6 +130,23 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
         binding.galleryRecyclerView.apply {
             setLayoutManager(layoutManager)
             adapter = thumbnailGalleryAdapter
+            viewTreeObserver.addOnPreDrawListener {
+                startPostponedEnterTransition()
+                true
+            }
+            addOnLayoutChangeListener { p0, p1, p2, p3, p4, p5, p6, p7, p8 ->
+                if (sharedGallery.currentPosFromMediaViewer != -1) {
+                    val viewAtPos = layoutManager.findViewByPosition(sharedGallery.currentPosFromMediaViewer)
+                    if (viewAtPos == null ||
+                        layoutManager.isViewPartiallyVisible(viewAtPos, false, true)
+                    ) {
+                        this@apply.post {
+                            layoutManager.scrollToPosition(sharedGallery.currentPosFromMediaViewer)
+                            sharedGallery.currentPosFromMediaViewer = -1
+                        }
+                    }
+                }
+            }
         }
 
         binding.galleryRecyclerView.setOnKeyListener { _, _, keyEvent ->
@@ -184,12 +201,18 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
      */
     private fun setupToolBar() {
         val toolBar = binding.thumbnailToolbar
-        toolBar.inflateMenu(R.menu.thumbnail_gallery_menu)
-        toolBar.setNavigationOnClickListener {
-            showToolBarItemsOnSelection()
-            thumbnailGalleryAdapter.disableLongPressDeletion()
+        toolBar.apply {
+            inflateMenu(R.menu.thumbnail_gallery_menu)
+            setNavigationIcon(R.drawable.ic_back_arrow)
+            // Set click listener for the navigation back button.
+            setNavigationOnClickListener {
+                if (thumbnailGalleryAdapter.longPressDeleteEnabled) {
+                    showToolBarItemsOnSelection()
+                    thumbnailGalleryAdapter.disableLongPressDeletion()
+                } else
+                    requireActivity().onBackPressed()
+            }
         }
-
         // Initially hide some menu items that shouldn't be shown.
         toolBar.menu.findItem(R.id.trash_menu_item).apply { isVisible = false }
         val allFilterMenuItem = toolBar.menu.findItem(R.id.all_filter_menu_item).apply { isVisible = false }
@@ -197,13 +220,6 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
 
         toolBar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.camera_menu_item -> {
-                    val navController = findNavController()
-                    val actionToCamera =
-                        ThumbnailGalleryFragmentDirections.actionImageGalleryFragmentToCameraViewFragment2()
-                    navController.navigate(actionToCamera)
-                    true
-                }
                 R.id.all_filter_menu_item -> {
                     // Show all images
                     thumbnailGalleryAdapter.submitList(sharedGallery.mediaFiles.value)
@@ -248,7 +264,6 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
         val toolBar = binding.thumbnailToolbar
         toolBar.apply {
             menu.findItem(R.id.trash_menu_item).apply { isVisible = true }
-            menu.findItem(R.id.camera_menu_item).apply { isVisible = false }
             val favoritesFilter = menu.findItem(R.id.favorites_filter_menu_item)
             val allFilter = menu.findItem(R.id.all_filter_menu_item)
             // Hide the correct menu item since the favorites filter and all filters hide each other's visibility already.
@@ -264,13 +279,14 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
      */
     private fun showToolBarItemsOnSelection() {
         val toolBar = binding.thumbnailToolbar
-        // Remove the navigation "X" button on the top left.
-        toolBar.navigationIcon = null
+
         toolBar.apply {
+            // Remove the navigation "X" button on the navigation icon and replace it with the back arrow.
+            setNavigationIcon(R.drawable.ic_back_arrow)
             menu.findItem(R.id.trash_menu_item).apply { isVisible = false }
-            menu.findItem(R.id.camera_menu_item).apply { isVisible = true }
             val favoritesFilter = menu.findItem(R.id.favorites_filter_menu_item)
             val allFilter = menu.findItem(R.id.all_filter_menu_item)
+
             // Use the currentFilterMode to determine which filter option should be shown.
             when (currentFilterMode) {
                 // Show the all filter if the selection mode was done in the FILTER mode.

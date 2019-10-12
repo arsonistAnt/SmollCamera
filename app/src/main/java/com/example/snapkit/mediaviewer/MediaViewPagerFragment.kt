@@ -16,9 +16,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager.widget.ViewPager
+import com.example.snapkit.ActivityMainHostListener
 import com.example.snapkit.DeleteAlertDialogFragment
 import com.example.snapkit.R
 import com.example.snapkit.SharedGalleryViewModel
@@ -32,7 +32,8 @@ import java.io.File
 // Store the page margin value (in dp)
 private const val PAGE_MARGIN = 24
 
-class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlertDialogListener {
+class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlertDialogListener,
+    ActivityMainHostListener {
     private lateinit var binding: FragmentMediaViewPagerBinding
     private lateinit var sharedGallery: SharedGalleryViewModel
     private lateinit var mediaViewPager: MediaViewPager
@@ -53,11 +54,11 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMediaViewPagerBinding.inflate(inflater)
-
         binding.viewModel = mediaViewModel
         initBottomNavBar()
         initMediaPager()
         initObserversShared()
+        initMediaViewModelObservers()
         return binding.root
     }
 
@@ -69,26 +70,34 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             mediaDialog.setMessage(getString(R.string.storage_dialog_message))
             mediaDialog.setTitle(R.string.permissions_dialog_title)
             requestForPermissions(requireActivity(), mediaDialog, *permissions)
-        } else if (!sharedGallery.transitioning) {
+        } else if (!sharedGallery.transitionToMediaViewPager) {
             sharedGallery.updateImageFiles()
             Timber.i("Updating in onStart()")
         }
+    }
+
+    override fun onBackButtonPressed(): Boolean {
+        sharedGallery.currentPosFromMediaViewer = mediaViewPager.currentItem
+        return false
     }
 
     /**
      * Setup the shared element transition for this fragment.
      */
     private fun setupSharedElementTransition() {
-        if (sharedGallery.transitioning)
+        // Postpone the animation to make time for the Fragments to be created in the ViewPager.
+        if (sharedGallery.transitionToMediaViewPager)
             postponeEnterTransition()
         sharedElementEnterTransition =
             TransitionInflater.from(requireContext()).inflateTransition(R.transition.image_transition)
+        sharedElementReturnTransition = null
+
+        // Add a transition listener to properly load image data after the animation is finished.
         (sharedElementEnterTransition as TransitionSet).addListener(object :
             android.transition.Transition.TransitionListener {
             override fun onTransitionEnd(p0: android.transition.Transition?) {
-                sharedGallery.transitioning = false
+                sharedGallery.transitionToMediaViewPager = false
                 sharedGallery.updateImageFiles()
-                Timber.i("Updating in onEndAnimation")
             }
 
             override fun onTransitionResume(p0: android.transition.Transition?) {}
@@ -154,44 +163,10 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
         }
     }
 
-
     /**
-     * Subscribe observer to the shared ViewModel data.
+     * Subscribe observers to the MediaViewModel live data.
      */
-    @SuppressLint("InflateParams")
-    private fun initObserversShared() {
-        sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { imageList ->
-            val mediaViewPager = binding.mediaViewer
-            val mediaViewPagerAdapter = MediaViewPagerAdapter(imageList, childFragmentManager)
-            mediaViewPager.adapter = mediaViewPagerAdapter
-            mediaViewPager.currentItem = safeFragmentArgs.clickPosition
-            mediaViewPager.onSingleTap {
-                toggleSystemUI()
-            }
-
-            // Set currentItem after the trashButton has been pressed.
-            mediaViewModel.trashButtonPressed.value?.let { pressed ->
-                if (pressed) {
-                    mediaViewPager.currentItem = mediaViewModel.currentItemPosition
-                    mediaViewModel.trashButtonClickedDone()
-                }
-            }
-        })
-
-        sharedGallery.favoriteImagesUri.observe(viewLifecycleOwner, Observer { _ ->
-            handleHeartIcon(mediaViewPager.currentItem)
-        })
-
-        mediaViewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { shouldNavigate ->
-            if (shouldNavigate) {
-                val navController = findNavController()
-                val actionToGallery =
-                    MediaViewPagerFragmentDirections.actionMediaViewPagerFragmentToImageGalleryFragment2()
-                navController.navigate(actionToGallery)
-                mediaViewModel.navigateToGalleryDone()
-            }
-        })
-
+    private fun initMediaViewModelObservers() {
         mediaViewModel.sharePhoto.observe(viewLifecycleOwner, Observer { startShareIntent ->
             if (startShareIntent) {
                 shareImageIntent()
@@ -227,6 +202,42 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             if (trashButtonClicked) {
                 DeleteAlertDialogFragment().show(childFragmentManager, "trash_button")
             }
+        })
+
+        mediaViewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { galleryButtonClicked ->
+            if (galleryButtonClicked) {
+                requireActivity().onBackPressed()
+                mediaViewModel.navigateToGalleryDone()
+            }
+        })
+    }
+
+
+    /**
+     * Subscribe observer to the shared ViewModel data.
+     */
+    @SuppressLint("InflateParams")
+    private fun initObserversShared() {
+        sharedGallery.mediaFiles.observe(viewLifecycleOwner, Observer { imageList ->
+            val mediaViewPager = binding.mediaViewer
+            val mediaViewPagerAdapter = MediaViewPagerAdapter(imageList, childFragmentManager)
+            mediaViewPager.adapter = mediaViewPagerAdapter
+            mediaViewPager.currentItem = safeFragmentArgs.clickPosition
+            mediaViewPager.onSingleTap {
+                toggleSystemUI()
+            }
+
+            // Set currentItem after the trashButton has been pressed.
+            mediaViewModel.trashButtonPressed.value?.let { pressed ->
+                if (pressed) {
+                    mediaViewPager.currentItem = mediaViewModel.currentItemPosition
+                    mediaViewModel.trashButtonClickedDone()
+                }
+            }
+        })
+
+        sharedGallery.favoriteImagesUri.observe(viewLifecycleOwner, Observer { _ ->
+            handleHeartIcon(mediaViewPager.currentItem)
         })
     }
 

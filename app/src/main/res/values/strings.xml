@@ -16,12 +16,14 @@
     <string name="delete_alert_positive">Remove</string>
     <string name="delete_alert_negative">Cancel</string>
 
-    <!--Miscellaneous-->
-    <string name="refresh_temp_delete_later">Refresh</string>
-    <string name="file_authority">com.example.snapkit.fileprovider</string>
+    <!--Menu Item Names-->
     <string name="thumbnail_tool_bar_title">Gallery</string>
     <string name="item_name_camera">Camera</string>
     <string name="item_name_trash">Trash</string>
     <string name="favorites_menu_item">Filter by Favorites</string>
     <string name="show_all_images_menu_items">Show All Images</string>
+
+    <!--Miscellaneous-->
+    <string name="refresh_temp_delete_later">Refresh</string>
+    <string name="file_authority">com.example.snapkit.fileprovider</string>
 </resources>

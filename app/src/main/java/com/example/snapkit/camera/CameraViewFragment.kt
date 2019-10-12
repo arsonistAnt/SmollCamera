@@ -156,9 +156,9 @@ class CameraViewFragment : Fragment() {
         viewModel.navigateToGallery.observe(viewLifecycleOwner, Observer { navigateToGallery ->
             if (navigateToGallery) {
                 val navController = findNavController()
-                val actionToMediaViewer =
-                    CameraViewFragmentDirections.actionCameraViewFragment2ToMediaViewPagerFragment(0)
-                navController.navigate(actionToMediaViewer)
+                val actionToGallery =
+                    CameraViewFragmentDirections.actionCameraViewFragment2ToImageGalleryFragment()
+                navController.navigate(actionToGallery)
                 viewModel.onGalleryButtonFinished()
             }
 

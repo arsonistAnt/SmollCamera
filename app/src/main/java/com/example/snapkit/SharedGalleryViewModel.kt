@@ -22,8 +22,11 @@ class SharedGalleryViewModel(application: Application) : AndroidViewModel(applic
     // A repository object that handles fetching/updating/removing image files.
     private var imageRepository = MediaFileRepository(application)
 
-    // Keep track of the transitioning process from destination to destination.
-    var transitioning = false
+    // Stores the current image position in the MediaViewer, this is used to snap to the correct scroll position in the image gallery.
+    var currentPosFromMediaViewer = 0
+
+    // Keep track of transition from thumbnail gallery to MediaViewPager.
+    var transitionToMediaViewPager = false
 
     init {
         // Modify the return value so that it will return a LiveData ImageFile list instead of a MediaFile list.
