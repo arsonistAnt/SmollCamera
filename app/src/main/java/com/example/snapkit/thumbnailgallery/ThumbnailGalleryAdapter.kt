@@ -1,9 +1,12 @@
 package com.example.snapkit.thumbnailgallery
 
+import android.animation.ValueAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -13,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.example.snapkit.R
 import com.example.snapkit.databinding.ItemThumbnailViewBinding
 import com.example.snapkit.domain.ImageFile
+import timber.log.Timber
 
 class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListener) :
     ListAdapter<ImageFile, ThumbnailGalleryAdapter.ThumbnailViewHolder>(DiffImageFileCallBack) {
@@ -50,7 +54,7 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
 
     override fun onBindViewHolder(holder: ThumbnailViewHolder, position: Int) {
         val imageView = holder.thumbnail.thumbnailView
-        val imageFrame = holder.thumbnail.imageViewFrame
+        val imageCard = holder.thumbnail.imageCard
         val imageFile = getItem(position)
         val filePath = getItem(position).filePath
         // Call the OnClickThumbnailListener in the onClick method of the ImageView.
@@ -60,13 +64,13 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
 
             setOnClickListener {
                 if (_longPressDeleteEnabled) {
-                    toggleHighlightSelection(imageFrame, imageFile, holder.adapterPosition)
+                    toggleHighlightSelection(imageCard, imageFile, holder.adapterPosition)
                 } else {
                     onClickListener.onClick(holder.adapterPosition, imageFile, imageView)
                 }
             }
             setOnLongClickListener {
-                addSelectionHighlight(imageFrame)
+                addSelectionHighlight(imageCard)
                 enableLongPressDeletion()
                 // Add the data pertaining to the view to the selected items.
                 selectedItems.add(Pair(imageFile, holder.adapterPosition))
@@ -76,8 +80,8 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
         }
         // Check to see if the imageFrame SHOULD be highlighted after the ViewHolder has been re-used.
         when (selectedItems.contains(Pair(imageFile, holder.adapterPosition))) {
-            true -> addSelectionHighlight(imageFrame)
-            else -> removeSelectionHighlight(imageFrame)
+            true -> addSelectionHighlight(imageCard)
+            else -> removeSelectionHighlight(imageCard)
         }
         // Remove any previous data.
         Glide.with(imageView.context)
@@ -96,7 +100,7 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
      * @param imageData the image data.
      * @param position the position of the imageFrame in the recycler view
      */
-    private fun toggleHighlightSelection(imageFrame: FrameLayout, imageData: ImageFile, position: Int) {
+    private fun toggleHighlightSelection(imageFrame: CardView, imageData: ImageFile, position: Int) {
         // If delete selection is enabled then highlight the imageView.
         if (_longPressDeleteEnabled) {
             val itemData = Pair(imageData, position)
@@ -123,8 +127,20 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
      *
      * @param view the FrameLayout to highlight.
      */
-    private fun addSelectionHighlight(view: FrameLayout) {
-        view.foreground = ContextCompat.getDrawable(view.context, R.drawable.white_transparent_tint)
+    private fun addSelectionHighlight(view: CardView) {
+        view.foreground = ContextCompat.getDrawable(view.context, R.drawable.dark_transparent_tint)
+        // Animate the scale of the selected view
+        ValueAnimator.ofFloat(1f, 0.90f).apply {
+            duration = 150
+            addUpdateListener { animator ->
+                val animatedScaleValue = animator.animatedValue as Float
+                Timber.i("$animatedScaleValue")
+                view.scaleX = animatedScaleValue
+                view.scaleY = animatedScaleValue
+            }
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
     }
 
     /**
@@ -135,6 +151,17 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
      */
     private fun removeSelectionHighlight(view: FrameLayout) {
         view.foreground = null
+        ValueAnimator.ofFloat(.90f, 1f).apply {
+            duration = 100
+            addUpdateListener { animator ->
+                val animatedScaleValue = animator.animatedValue as Float
+                Timber.i("$animatedScaleValue")
+                view.scaleX = animatedScaleValue
+                view.scaleY = animatedScaleValue
+            }
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
     }
 
     /**

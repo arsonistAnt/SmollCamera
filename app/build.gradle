@@ -75,4 +75,5 @@ dependencies {
 
     // Timber Library
     implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation 'androidx.cardview:cardview:1.0.0'
 }

@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Snap Kit</string>
+    <string name="app_name">Photo Kit</string>
     <!--Permission Strings-->
     <string name="capture_button_string">SNAP</string>
-    <string name="permissions_dialog_title">Snap Kit Permissions</string>
+    <string name="permissions_dialog_title">Photo Kit Permissions</string>
     <string name="camera_dialog_message">This app needs Camera, Storage, and Microphone permissions in order to function
         properly. \n\nPlease go to the app settings and allow use of these features.
     </string>
@@ -12,7 +12,7 @@
     </string>
     <!-- Delete Alert Dialog Strings-->
     <string name="delete_alert_title">Remove this image?</string>
-    <string name="delete_alert_message">Remove the image from Snap Kit?</string>
+    <string name="delete_alert_message">Remove the image from Photo Kit?</string>
     <string name="delete_alert_positive">Remove</string>
     <string name="delete_alert_negative">Cancel</string>
 

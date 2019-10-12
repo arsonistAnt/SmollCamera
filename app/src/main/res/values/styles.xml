@@ -9,6 +9,7 @@
         <item name="actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowContentTransitions">true</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
     </style>
 
     <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">

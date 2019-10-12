@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -22,11 +23,13 @@ import com.example.snapkit.domain.ImageFile
 import com.example.snapkit.utils.getPermissionAlertDialog
 import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
+import timber.log.Timber
 
 class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
     lateinit var binding: FragmentThumbnailGalleryViewBinding
     lateinit var sharedGallery: SharedGalleryViewModel
     lateinit var thumbnailGalleryAdapter: ThumbnailGalleryAdapter
+    private var originalStatusBarTransparency: Int = 0
     private val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
 
     // Helps determine the image shown state of the thumbnail gallery.
@@ -37,6 +40,7 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = FragmentThumbnailGalleryViewBinding.inflate(layoutInflater)
+        originalStatusBarTransparency = requireActivity().window.statusBarColor
         initRecyclerView()
         setupSystemWindows()
         setupToolBar()
@@ -59,9 +63,19 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
 
     override fun onStart() {
         super.onStart()
+        // Modify status bar transparency
+        val window = requireActivity().window
+        window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.transparent)
         ViewCompat.requestApplyInsets(binding.galleryLayout)
         // Make sure user has given access to storage permissions before updating the thumbnail gallery.
         checkPermissionForStorage()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val window = requireActivity().window
+        window.statusBarColor = originalStatusBarTransparency
+        Timber.i("Pause")
     }
 
     /**
