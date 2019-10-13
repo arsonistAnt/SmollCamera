@@ -21,7 +21,7 @@ A photo camera application with simple features and a dark themed minimalistic U
 [Glide](https://github.com/bumptech/glide)
 
 ## Credits
-<img src="https://github.com/arsonistAnt/photo-kit/blob/master/readme_images/photo_kit_icon.png"  width="31" height="32"> icon taken from this [page](https://www.flaticon.com/free-icon/camera_1042339#term=camera&page=1&position=30)
+Launcher icon taken from this [page](https://www.flaticon.com/free-icon/camera_1042339#term=camera&page=1&position=30)
 
 ## Debug Release
 You can find the stable debug release on this [page](https://github.com/arsonistAnt/photo-kit/releases/tag/1.0).
