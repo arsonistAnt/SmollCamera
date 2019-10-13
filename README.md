@@ -20,3 +20,5 @@ A photo camera application with simple features and a dark themed minimalistic U
 ## Credits
 Launcher icon take from this [page](https://www.flaticon.com/free-icon/camera_1042339#term=camera&page=1&position=30)
 
+## Debug Release
+You can find the stable debug release on this [page](https://github.com/arsonistAnt/photo-kit/releases/tag/1.0).
