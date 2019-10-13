@@ -26,7 +26,6 @@ import com.example.snapkit.database.FavoritedImage
 import com.example.snapkit.databinding.FragmentMediaViewPagerBinding
 import com.example.snapkit.domain.ImageFile
 import com.example.snapkit.utils.*
-import timber.log.Timber
 import java.io.File
 
 // Store the page margin value (in dp)
@@ -72,7 +71,6 @@ class MediaViewPagerFragment : Fragment(), DeleteAlertDialogFragment.DeleteAlert
             requestForPermissions(requireActivity(), mediaDialog, *permissions)
         } else if (!sharedGallery.transitionToMediaViewPager) {
             sharedGallery.updateImageFiles()
-            Timber.i("Updating in onStart()")
         }
     }
 

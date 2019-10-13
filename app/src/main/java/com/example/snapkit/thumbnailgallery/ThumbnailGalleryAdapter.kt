@@ -134,7 +134,6 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
             duration = 150
             addUpdateListener { animator ->
                 val animatedScaleValue = animator.animatedValue as Float
-                Timber.i("$animatedScaleValue")
                 view.scaleX = animatedScaleValue
                 view.scaleY = animatedScaleValue
             }

@@ -23,7 +23,6 @@ import com.example.snapkit.domain.ImageFile
 import com.example.snapkit.utils.getPermissionAlertDialog
 import com.example.snapkit.utils.hasPermissions
 import com.example.snapkit.utils.requestForPermissions
-import timber.log.Timber
 
 class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
     lateinit var binding: FragmentThumbnailGalleryViewBinding
@@ -75,7 +74,6 @@ class ThumbnailGalleryFragment : Fragment(), ActivityMainHostListener {
         super.onPause()
         val window = requireActivity().window
         window.statusBarColor = originalStatusBarTransparency
-        Timber.i("Pause")
     }
 
     /**
