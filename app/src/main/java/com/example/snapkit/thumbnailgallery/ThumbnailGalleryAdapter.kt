@@ -16,7 +16,6 @@ import com.bumptech.glide.Glide
 import com.example.snapkit.R
 import com.example.snapkit.databinding.ItemThumbnailViewBinding
 import com.example.snapkit.domain.ImageFile
-import timber.log.Timber
 
 class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListener) :
     ListAdapter<ImageFile, ThumbnailGalleryAdapter.ThumbnailViewHolder>(DiffImageFileCallBack) {
@@ -154,7 +153,6 @@ class ThumbnailGalleryAdapter(private val onClickListener: OnClickThumbnailListe
             duration = 100
             addUpdateListener { animator ->
                 val animatedScaleValue = animator.animatedValue as Float
-                Timber.i("$animatedScaleValue")
                 view.scaleX = animatedScaleValue
                 view.scaleY = animatedScaleValue
             }
